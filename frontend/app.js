@@ -160,6 +160,7 @@ const HAND_POSES = {
 // UI Controller Class
 class ArthUI {
   static init() {
+    this.initThemeSwitcher();
     this.initSpeechVoices();
     this.initMediaPipe();
     this.bindNavigation();
@@ -174,6 +175,42 @@ class ArthUI {
     this.setupSpeechRecognition();
 
     requestAnimationFrame((ts) => this.renderCameraLoop(ts));
+  }
+
+  // Theme Accent Customizer (Electric Iris, Cyber Ocean, Emerald Mint, Sunset Aurora)
+  static initThemeSwitcher() {
+    const savedTheme = localStorage.getItem('arth_theme_accent') || 'iris';
+    this.applyTheme(savedTheme);
+
+    document.querySelectorAll('[data-set-theme]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const theme = btn.getAttribute('data-set-theme');
+        this.applyTheme(theme);
+        if (typeof SoundEffects !== 'undefined') SoundEffects.click();
+      });
+    });
+  }
+
+  static applyTheme(theme) {
+    if (theme === 'iris') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('arth_theme_accent', theme);
+
+    // Update active dot indicators
+    document.querySelectorAll('[data-set-theme]').forEach(btn => {
+      if (btn.getAttribute('data-set-theme') === theme) {
+        btn.classList.add('active');
+        btn.style.boxShadow = '0 0 0 2px #FFFFFF, 0 0 0 4px var(--primary)';
+        btn.style.transform = 'scale(1.2)';
+      } else {
+        btn.classList.remove('active');
+        btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2)';
+        btn.style.transform = 'scale(1.0)';
+      }
+    });
   }
 
   // Navigation Switching
@@ -547,9 +584,8 @@ class ArthUI {
     requestAnimationFrame((ts) => this.renderCameraLoop(ts));
   }
 
-  // Draw REAL 21-joint skeleton tracked from user's physical hand
+  // Draw REAL 21-joint skeleton tracked from user's physical hand with futuristic HUD aesthetic
   static drawRealHandMesh(ctx, width, height, landmarks) {
-    // Project normalized [0..1] coordinates to canvas dimensions
     const isMirrored = ArthState.isCameraMirrored;
     const pts = landmarks.map(p => ({
       x: isMirrored ? (1 - p.x) * width : p.x * width,
@@ -565,59 +601,107 @@ class ArthUI {
       maxY = Math.max(maxY, p.y);
     });
 
-    const pad = 16;
+    const pad = 18;
     minX = Math.max(0, minX - pad);
     maxX = Math.min(width, maxX + pad);
     minY = Math.max(0, minY - pad);
     maxY = Math.min(height, maxY + pad);
 
-    // Dynamic Live Tracking Box
-    ctx.strokeStyle = '#10B981'; // Emerald tracking border
-    ctx.lineWidth = 2;
-    ctx.setLineDash([6, 4]);
+    // Dynamic Live Reticle Box
+    ctx.save();
+    ctx.strokeStyle = '#06B6D4';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([8, 6]);
+    ctx.shadowColor = '#06B6D4';
+    ctx.shadowBlur = 8;
     ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
     ctx.setLineDash([]);
+    ctx.restore();
 
-    // Live AI Pill Badge
-    ctx.fillStyle = '#10B981';
-    const tagText = `AI Track • ${ArthState.activeHandSide}`;
+    // Corner Reticles on Bounding Box
+    const cLen = 10;
+    ctx.save();
+    ctx.strokeStyle = '#10B981';
+    ctx.lineWidth = 2.5;
+    ctx.shadowColor = '#10B981';
+    ctx.shadowBlur = 10;
+    // Top-Left
+    ctx.beginPath(); ctx.moveTo(minX, minY + cLen); ctx.lineTo(minX, minY); ctx.lineTo(minX + cLen, minY); ctx.stroke();
+    // Top-Right
+    ctx.beginPath(); ctx.moveTo(maxX - cLen, minY); ctx.lineTo(maxX, minY); ctx.lineTo(maxX, minY + cLen); ctx.stroke();
+    // Bottom-Left
+    ctx.beginPath(); ctx.moveTo(minX, maxY - cLen); ctx.lineTo(minX, maxY); ctx.lineTo(minX + cLen, maxY); ctx.stroke();
+    // Bottom-Right
+    ctx.beginPath(); ctx.moveTo(maxX - cLen, maxY); ctx.lineTo(maxX, maxY); ctx.lineTo(maxX, maxY - cLen); ctx.stroke();
+    ctx.restore();
+
+    // Live AI Telemetry Pill Badge
+    ctx.save();
+    const tagText = `● AI TRACKING • ${ArthState.activeHandSide}`;
     ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
     const textWidth = ctx.measureText(tagText).width;
+    const badgeY = Math.max(18, minY - 24);
+    ctx.shadowColor = '#10B981';
+    ctx.shadowBlur = 10;
+    ctx.fillStyle = '#059669';
     ctx.beginPath();
-    ctx.roundRect(minX, Math.max(18, minY - 22), textWidth + 14, 20, 6);
+    ctx.roundRect(minX, badgeY, textWidth + 16, 20, 6);
     ctx.fill();
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(tagText, minX + 7, Math.max(18, minY - 22) + 14);
+    ctx.shadowBlur = 0;
+    ctx.fillText(tagText, minX + 8, badgeY + 14);
+    ctx.restore();
 
-    // Draw Skeleton Bones (Vibrant Indigo lines)
+    // Draw Skeleton Bones with Glowing Gradient
+    ctx.save();
     ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
+    ctx.shadowColor = '#06B6D4';
+    ctx.shadowBlur = 10;
     HAND_LANDMARK_CONNECTIONS.forEach(([startIdx, endIdx]) => {
       const p1 = pts[startIdx];
       const p2 = pts[endIdx];
       if (p1 && p2) {
-        ctx.strokeStyle = '#4F46E5';
+        const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+        grad.addColorStop(0, '#06B6D4');
+        grad.addColorStop(1, '#818CF8');
+        ctx.strokeStyle = grad;
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
     });
+    ctx.restore();
 
-    // Draw Joint Points (Glow emerald for fingertips, crisp white for joints)
+    // Draw Joint Points (Glow emerald for fingertips, crisp white for internal joints)
     pts.forEach((pt, idx) => {
-      ctx.beginPath();
+      ctx.save();
       const isFingertip = (idx === 4 || idx === 8 || idx === 12 || idx === 16 || idx === 20);
+      ctx.beginPath();
       ctx.arc(pt.x, pt.y, isFingertip ? 6.5 : 4, 0, Math.PI * 2);
-      ctx.fillStyle = isFingertip ? '#10B981' : '#FFFFFF';
-      ctx.fill();
-      ctx.strokeStyle = isFingertip ? '#FFFFFF' : '#312E81';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      if (isFingertip) {
+        ctx.shadowColor = '#10B981';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = '#34D399';
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.shadowColor = '#6366F1';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        ctx.strokeStyle = '#4F46E5';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+      }
+      ctx.restore();
     });
   }
 
-  // Draw 21-point hand skeleton with realistic movement
+  // Draw 21-point hand skeleton with realistic movement and modern glowing aesthetic
   static drawSimulatedHandMesh(ctx, width, height, time) {
     const t = time * 0.002;
     let basePose = HAND_POSES.open_palm;
@@ -646,48 +730,79 @@ class ArthUI {
     const pad = 20;
     minX -= pad; maxX += pad; minY -= pad; maxY += pad;
 
-    // Subtle Box
-    ctx.strokeStyle = 'rgba(79, 70, 229, 0.4)';
-    ctx.lineWidth = 1.5;
-    ctx.setLineDash([4, 4]);
+    // Glowing Reticle Box
+    ctx.save();
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.5)';
+    ctx.lineWidth = 1.8;
+    ctx.setLineDash([6, 5]);
+    ctx.shadowColor = '#06B6D4';
+    ctx.shadowBlur = 8;
     ctx.strokeRect(minX, minY, maxX - minX, maxY - minY);
     ctx.setLineDash([]);
+    ctx.restore();
 
     // AI Badge
+    ctx.save();
     ctx.fillStyle = '#4F46E5';
-    const tagText = `Hand 1 • ${(ArthState.confidence).toFixed(0)}%`;
-    ctx.font = '600 11px Plus Jakarta Sans, sans-serif';
+    ctx.shadowColor = '#6366F1';
+    ctx.shadowBlur = 8;
+    const tagText = `● AI VISION • ${(ArthState.confidence).toFixed(0)}% Match`;
+    ctx.font = '700 11px Plus Jakarta Sans, sans-serif';
     const textWidth = ctx.measureText(tagText).width;
     ctx.beginPath();
-    ctx.roundRect(minX, minY - 22, textWidth + 14, 18, 5);
+    ctx.roundRect(minX, minY - 24, textWidth + 16, 20, 6);
     ctx.fill();
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(tagText, minX + 7, minY - 9);
+    ctx.shadowBlur = 0;
+    ctx.fillText(tagText, minX + 8, minY - 10);
+    ctx.restore();
 
     // Draw Skeleton Bones
+    ctx.save();
     ctx.lineWidth = 3.5;
     ctx.lineCap = 'round';
+    ctx.shadowColor = '#06B6D4';
+    ctx.shadowBlur = 10;
     HAND_LANDMARK_CONNECTIONS.forEach(([startIdx, endIdx]) => {
       const p1 = transformedPoints[startIdx];
       const p2 = transformedPoints[endIdx];
       if (p1 && p2) {
-        ctx.strokeStyle = '#4F46E5';
+        const grad = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+        grad.addColorStop(0, '#06B6D4');
+        grad.addColorStop(1, '#818CF8');
+        ctx.strokeStyle = grad;
         ctx.beginPath();
         ctx.moveTo(p1.x, p1.y);
         ctx.lineTo(p2.x, p2.y);
         ctx.stroke();
       }
     });
+    ctx.restore();
 
     // Draw Joint Points
     transformedPoints.forEach((pt, idx) => {
+      ctx.save();
+      const isFingertip = (idx === 4 || idx === 8 || idx === 12 || idx === 16 || idx === 20);
       ctx.beginPath();
-      ctx.arc(pt.x, pt.y, idx % 4 === 0 ? 6 : 4, 0, Math.PI * 2);
-      ctx.fillStyle = idx % 4 === 0 ? '#10B981' : '#FFFFFF';
-      ctx.fill();
-      ctx.strokeStyle = '#312E81';
-      ctx.lineWidth = 2;
-      ctx.stroke();
+      ctx.arc(pt.x, pt.y, isFingertip ? 6.5 : 4, 0, Math.PI * 2);
+      if (isFingertip) {
+        ctx.shadowColor = '#10B981';
+        ctx.shadowBlur = 14;
+        ctx.fillStyle = '#34D399';
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      } else {
+        ctx.shadowColor = '#6366F1';
+        ctx.shadowBlur = 6;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fill();
+        ctx.strokeStyle = '#4F46E5';
+        ctx.lineWidth = 1.8;
+        ctx.stroke();
+      }
+      ctx.restore();
     });
   }
 

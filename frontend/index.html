@@ -47,8 +47,17 @@
         <a href="#faq" class="hover:text-indigo-600 transition">FAQ</a>
       </nav>
 
-      <!-- Right Header Actions: Sign In / Sign Up & Launch App -->
+      <!-- Right Header Actions: Theme Switcher, Sign In / Sign Up & Launch App -->
       <div class="flex items-center gap-2.5">
+        <!-- Interactive Theme Accent Switcher -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 shadow-xs" title="Select UI Accent Palette">
+          <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 hidden sm:inline">Theme</span>
+          <button data-set-theme="iris" class="theme-dot bg-indigo-600 active" title="Electric Iris (Default)"></button>
+          <button data-set-theme="ocean" class="theme-dot bg-sky-500" title="Cyber Ocean"></button>
+          <button data-set-theme="emerald" class="theme-dot bg-emerald-500" title="Emerald Mint"></button>
+          <button data-set-theme="sunset" class="theme-dot bg-rose-500" title="Sunset Aurora"></button>
+        </div>
+
         <div class="arth-auth-container flex items-center gap-2">
           <button onclick="openAuthModal('signin')" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 transition">
             Sign In
@@ -57,7 +66,7 @@
             Sign Up Free
           </button>
         </div>
-        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-200 transition flex items-center gap-1.5 cursor-pointer">
+        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="px-4 py-2 rounded-xl btn-gradient-primary text-white text-xs font-bold transition flex items-center gap-1.5 cursor-pointer">
           <span>Launch App</span>
           <svg width="14" height="14" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
         </a>
@@ -77,7 +86,7 @@
   </div>
 
   <!-- Mobile Floating Trigger Button (Left Bottom) -->
-  <button onclick="openFeatureDrawer('camera')" class="lg:hidden fixed bottom-5 left-5 z-40 px-4 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-xl flex items-center gap-2 border border-indigo-400">
+  <button onclick="openFeatureDrawer('camera')" class="lg:hidden fixed bottom-5 left-5 z-40 px-4 py-3 rounded-full btn-gradient-primary text-white font-extrabold text-xs shadow-xl flex items-center gap-2 border border-indigo-400">
     <span class="text-base">✨</span>
     <span>App Features (6)</span>
   </button>
@@ -92,15 +101,15 @@
     <div class="max-w-6xl mx-auto text-center flex flex-col items-center">
       
       <!-- Eyebrow Badge -->
-      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold mb-6 shadow-xs">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full badge-luminous-iris text-xs font-bold mb-6 shadow-xs">
+        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-emerald"></span>
         <span>World’s Most Accessible Two-Way Sign Language AI</span>
       </div>
 
       <!-- Main Catchy Headline -->
       <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.18] mb-5 max-w-4xl">
         Giving Silence a Voice.<br class="hidden sm:inline">
-        Giving Voice an <span class="bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-600 bg-clip-text text-transparent">Understanding.</span>
+        Giving Voice an <span class="text-gradient-headline">Understanding.</span>
       </h1>
 
       <!-- Subtitle Description -->
@@ -110,11 +119,11 @@
 
       <!-- Primary CTA Action Group -->
       <div class="flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto mb-10">
-        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="w-full sm:w-auto px-8 py-4 rounded-2xl btn-gradient-primary text-white font-extrabold text-sm shadow-xl shadow-indigo-200 transition flex items-center justify-center gap-2 cursor-pointer">
           <span>Open Live Translator</span>
           <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
         </a>
-        <a href="#features" class="w-full sm:w-auto px-7 py-4 rounded-2xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-sm shadow-xs transition flex items-center justify-center gap-2">
+        <a href="#features" class="w-full sm:w-auto px-7 py-4 rounded-2xl border border-indigo-200 bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 font-bold text-sm shadow-xs transition flex items-center justify-center gap-2">
           <span>Explore All 6 Features</span>
           <span class="text-xs">⚡</span>
         </a>
@@ -153,20 +162,27 @@
         <!-- Split Preview: Simulated Camera & Instant Speech -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
           
-          <!-- Left: Camera Preview Simulator (100% Light Theme!) -->
+          <!-- Left: Camera Preview Simulator (100% Modern Light & HUD Viewfinder!) -->
           <div class="rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-sky-50/50 border border-indigo-100 relative overflow-hidden h-72 flex items-center justify-center shadow-inner">
+            <!-- HUD Corner Reticles -->
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+
             <!-- Simulated Skeleton Overlay Canvas -->
             <canvas id="landingCanvas" class="w-full h-full"></canvas>
             <div class="scanner-grid"></div>
             <div class="scanner-laser"></div>
 
-            <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl text-[11px] font-bold text-slate-800 shadow-sm border border-slate-200">
-              Camera Input: Hand 1 (AI Vision)
+            <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl text-[11px] font-bold text-slate-800 shadow-sm border border-slate-200 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500 pulse-emerald"></span>
+              <span>Camera Input: Hand 1 (AI Vision)</span>
             </div>
 
             <div class="absolute bottom-3 inset-x-3 bg-white/95 backdrop-blur-md p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
               <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
                 Tracking: <strong id="demoSignLabel" class="text-indigo-600">Hello / Welcome</strong>
               </span>
               <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">98% Match</span>
@@ -178,7 +194,7 @@
             <div>
               <div class="flex items-center justify-between mb-3">
                 <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Speech Output</span>
-                <span class="text-xs text-indigo-600 font-bold">Text-to-Speech Ready</span>
+                <span class="text-xs text-indigo-600 font-bold badge-luminous-iris px-2.5 py-0.5 rounded-full">Text-to-Speech Ready</span>
               </div>
 
               <!-- Translated Speech Bubble -->
@@ -192,19 +208,19 @@
               <!-- Interactive Gesture Trigger Chips -->
               <span class="text-xs font-bold text-slate-700 block mb-2">Try Clicking a Hand Sign:</span>
               <div class="flex flex-wrap gap-2 mb-4">
-                <button onclick="simulateLandingSign('Hello / Welcome', 'Hello! Welcome to ARTH.')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition">
+                <button onclick="simulateLandingSign('Hello / Welcome', 'Hello! Welcome to ARTH.')" class="px-3 py-1.5 rounded-xl btn-gradient-primary text-white text-xs font-bold shadow-xs transition">
                   👋 Hello
                 </button>
-                <button onclick="simulateLandingSign('Thank You', 'Thank you so much for your assistance.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <button onclick="simulateLandingSign('Thank You', 'Thank you so much for your assistance.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition">
                   🙏 Thank You
                 </button>
-                <button onclick="simulateLandingSign('Help', 'I need immediate medical help.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <button onclick="simulateLandingSign('Help', 'I need immediate medical help.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition">
                   🆘 Help
                 </button>
-                <button onclick="simulateLandingSign('Water', 'Could you please give me drinking water?')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <button onclick="simulateLandingSign('Water', 'Could you please give me drinking water?')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition">
                   💧 Water
                 </button>
-                <button onclick="simulateLandingSign('I Love You', 'I love you my dear friend.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                <button onclick="simulateLandingSign('I Love You', 'I love you my dear friend.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition">
                   🤟 I Love You
                 </button>
               </div>
@@ -212,9 +228,9 @@
 
             <!-- Speak Aloud Button -->
             <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-              <button id="btnDemoSpeak" onclick="speakDemoText()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition">
+              <button id="btnDemoSpeak" onclick="speakDemoText()" class="px-4 py-2.5 rounded-xl btn-gradient-emerald text-white font-bold text-xs flex items-center gap-2 shadow-xs transition">
                 <svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
-                <span>Listen Aloud (TTS Voice)</span>
+                <span>Listen Aloud (Natural Speech)</span>
               </button>
               <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="text-xs font-extrabold text-indigo-600 hover:text-indigo-800 cursor-pointer">Launch Full Webcam Translator ➔</a>
             </div>
@@ -1455,8 +1471,42 @@
       }
     }
 
+    function initThemeSwitcher() {
+      const savedTheme = localStorage.getItem('arth_theme_accent') || 'iris';
+      applyTheme(savedTheme);
+
+      document.querySelectorAll('[data-set-theme]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const theme = btn.getAttribute('data-set-theme');
+          applyTheme(theme);
+        });
+      });
+    }
+
+    function applyTheme(theme) {
+      if (theme === 'iris') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      localStorage.setItem('arth_theme_accent', theme);
+
+      document.querySelectorAll('[data-set-theme]').forEach(btn => {
+        if (btn.getAttribute('data-set-theme') === theme) {
+          btn.classList.add('active');
+          btn.style.boxShadow = '0 0 0 2px #FFFFFF, 0 0 0 4px var(--primary)';
+          btn.style.transform = 'scale(1.2)';
+        } else {
+          btn.classList.remove('active');
+          btn.style.boxShadow = '0 1px 4px rgba(0,0,0,0.2)';
+          btn.style.transform = 'scale(1.0)';
+        }
+      });
+    }
+
     // Initialize Showcase with default feature on page load and handle auth guards
     document.addEventListener('DOMContentLoaded', () => {
+      initThemeSwitcher();
       selectShowcaseFeature('camera');
 
       // Check if redirected from translator app due to required sign in

@@ -9,7 +9,7 @@
     (function() {
       const token = localStorage.getItem('arth_jwt_token');
       const user = localStorage.getItem('arth_user_profile');
-      if (!token || !user) {
+      if ((!token || !user) && !window.location.search.includes('preview=1')) {
         try {
           sessionStorage.setItem('arth_auth_redirect', window.location.href);
         } catch (e) {}
@@ -87,8 +87,17 @@
         </button>
       </nav>
 
-      <!-- Right Controls: Dialect, Auth & Settings -->
+      <!-- Right Controls: Theme Switcher, Dialect, Auth & Settings -->
       <div class="flex items-center gap-2">
+        <!-- Theme Colorway Accent Switcher -->
+        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 shadow-xs" title="Select UI Accent Palette">
+          <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 hidden sm:inline">Theme</span>
+          <button data-set-theme="iris" class="theme-dot bg-indigo-600 active" title="Electric Iris (Default)"></button>
+          <button data-set-theme="ocean" class="theme-dot bg-sky-500" title="Cyber Ocean"></button>
+          <button data-set-theme="emerald" class="theme-dot bg-emerald-500" title="Emerald Mint"></button>
+          <button data-set-theme="sunset" class="theme-dot bg-rose-500" title="Sunset Aurora"></button>
+        </div>
+
         <button id="dialectSelector" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5" title="Switch between ASL and ISL">
           <span>ASL Mode</span>
         </button>
@@ -144,8 +153,14 @@
             </div>
           </div>
 
-          <!-- Video / Canvas Viewport -->
-          <div class="camera-stage relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
+          <!-- Video / Canvas Viewport with High-Tech HUD Reticles -->
+          <div class="camera-stage relative rounded-xl overflow-hidden bg-slate-900 border border-slate-700/80 shadow-2xl">
+            <!-- HUD Corner Reticles -->
+            <div class="hud-corner hud-tl"></div>
+            <div class="hud-corner hud-tr"></div>
+            <div class="hud-corner hud-bl"></div>
+            <div class="hud-corner hud-br"></div>
+
             <div class="scanner-grid"></div>
             <div class="scanner-laser"></div>
 
@@ -154,8 +169,8 @@
 
             <!-- Guide Box -->
             <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <div class="w-56 h-56 border-2 border-dashed border-indigo-400/50 rounded-2xl relative">
-                <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-2.5 py-0.5 rounded-full text-[10px] font-bold text-indigo-700 border border-indigo-200 uppercase tracking-wider">
+              <div class="w-56 h-56 border-2 border-dashed border-cyan-400/40 rounded-2xl relative">
+                <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-slate-900/90 text-cyan-400 px-2.5 py-0.5 rounded-full text-[10px] font-bold border border-cyan-500/40 uppercase tracking-wider shadow-sm">
                   Hold Hand Here
                 </span>
               </div>
@@ -163,15 +178,15 @@
 
             <!-- Bottom Floating Control Bar -->
             <div class="absolute bottom-3 inset-x-3 flex items-center justify-between p-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm">
-              <button id="btnToggleCamera" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition">
+              <button id="btnToggleCamera" class="px-3.5 py-1.5 rounded-lg btn-gradient-primary text-white font-bold text-xs flex items-center gap-1.5 transition">
                 <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 <span>Start Camera</span>
               </button>
 
               <div class="flex items-center gap-2">
                 <span class="text-[11px] font-semibold text-slate-600">Hold Lock:</span>
-                <div class="w-20 bg-slate-200 h-2 rounded-full overflow-hidden">
-                  <div id="stabilityBar" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 80%"></div>
+                <div class="w-24 bg-slate-200 h-2.5 rounded-full overflow-hidden p-0.5">
+                  <div id="stabilityBar" class="stability-shimmer h-full rounded-full transition-all" style="width: 80%"></div>
                 </div>
               </div>
             </div>
@@ -184,25 +199,25 @@
               Instant Test Gestures (Click any to test without camera):
             </span>
             <div class="flex items-center gap-1.5 flex-wrap">
-              <button data-trigger-sign="Hello / Welcome" class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-100 transition">
+              <button data-trigger-sign="Hello / Welcome" class="px-3 py-1.5 rounded-xl btn-gradient-primary text-white text-xs font-bold transition">
                 👋 Hello
               </button>
-              <button data-trigger-sign="Thank You" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="Thank You" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 hover:border-indigo-200 transition">
                 🙏 Thank You
               </button>
-              <button data-trigger-sign="Help" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="Help" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-rose-50 hover:text-rose-700 hover:border-rose-200 transition">
                 🆘 Help
               </button>
-              <button data-trigger-sign="Water" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="Water" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-sky-50 hover:text-sky-700 hover:border-sky-200 transition">
                 💧 Water
               </button>
-              <button data-trigger-sign="I Love You" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="I Love You" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-purple-50 hover:text-purple-700 hover:border-purple-200 transition">
                 🤟 I Love You
               </button>
-              <button data-trigger-sign="Yes" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="Yes" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 transition">
                 👍 Yes
               </button>
-              <button data-trigger-sign="No" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+              <button data-trigger-sign="No" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-amber-50 hover:text-amber-700 hover:border-amber-200 transition">
                 ✋ No
               </button>
             </div>
@@ -216,22 +231,22 @@
       <div class="lg:col-span-5 flex flex-col gap-4">
         
         <!-- Live Detected Output Card -->
-        <div class="arth-card p-5 bg-white border border-indigo-100">
+        <div class="arth-card p-5 bg-white border border-indigo-100/80 shadow-md">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600 animate-ping"></span>
               Detected Sign
             </span>
-            <span id="liveConfidenceBadge" class="badge-subtle-emerald px-2.5 py-0.5 rounded-full text-xs font-bold">
+            <span id="liveConfidenceBadge" class="badge-luminous-emerald px-2.5 py-0.5 rounded-full text-xs font-bold">
               98% Match
             </span>
           </div>
 
-          <h2 id="liveDetectedText" class="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
+          <h2 id="liveDetectedText" class="text-3xl font-black text-slate-900 tracking-tight mb-1 text-gradient-headline">
             Hello / Welcome
           </h2>
 
-          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between mb-4">
+          <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between mb-4">
             <div>
               <span class="font-bold text-slate-700">Hand Posture:</span>
               <span id="liveHandPose" class="ml-1 text-slate-600">Open flat palm waving gently</span>
@@ -240,7 +255,7 @@
 
           <!-- Buttons -->
           <div class="flex items-center gap-2">
-            <button onclick="ArthUI.appendCurrentSignToBuffer()" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2">
+            <button onclick="ArthUI.appendCurrentSignToBuffer()" class="flex-1 py-2.5 px-4 rounded-xl btn-gradient-primary text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2">
               <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
               <span>Add to Sentence</span>
             </button>
@@ -251,7 +266,7 @@
         </div>
 
         <!-- Sentence Builder Card -->
-        <div class="arth-card p-5 bg-white flex flex-col justify-between flex-1">
+        <div class="arth-card p-5 bg-white flex flex-col justify-between flex-1 shadow-md">
           <div>
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
@@ -276,17 +291,17 @@
 
           <!-- Bottom Action Buttons -->
           <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-            <button onclick="ArthUI.speakSentence()" class="flex-1 py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+            <button onclick="ArthUI.speakSentence()" class="flex-1 py-2.5 px-4 rounded-xl btn-gradient-emerald text-white font-bold text-xs transition flex items-center justify-center gap-2">
               <svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
               <span>Speak Sentence</span>
             </button>
-            <button onclick="ArthUI.copySentenceBuffer()" class="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition">
+            <button onclick="ArthUI.copySentenceBuffer()" class="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition">
               Copy
             </button>
-            <button onclick="ArthUI.sendDeafBufferToChat()" class="py-2 px-3 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-xs transition">
+            <button onclick="ArthUI.sendDeafBufferToChat()" class="py-2.5 px-3 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-xs transition">
               Post to Chat
             </button>
-            <button onclick="ArthUI.clearSentenceBuffer()" class="p-2 rounded-xl border border-slate-200 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition" title="Clear">
+            <button onclick="ArthUI.clearSentenceBuffer()" class="p-2.5 rounded-xl border border-slate-200 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition" title="Clear">
               <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
             </button>
           </div>
