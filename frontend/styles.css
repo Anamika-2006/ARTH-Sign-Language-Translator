@@ -1,0 +1,307 @@
+/* ================================================================
+   ARTH (अर्थ) - Modern Assistive Sign Language Translator UI/UX
+   Aesthetic: Premium Light & Accessible Theme (Zero Dark Colors)
+   ================================================================ */
+
+/* Base Global Reset & Bulletproof SVG Sizing */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+svg {
+  display: inline-block;
+  vertical-align: middle;
+  flex-shrink: 0;
+  max-width: 100%;
+}
+svg:not([width]) {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+svg.w-3, svg.h-3 { width: 0.75rem !important; height: 0.75rem !important; }
+svg.w-3\.5, svg.h-3\.5 { width: 0.875rem !important; height: 0.875rem !important; }
+svg.w-4, svg.h-4 { width: 1rem !important; height: 1rem !important; }
+svg.w-5, svg.h-5 { width: 1.25rem !important; height: 1.25rem !important; }
+svg.w-6, svg.h-6 { width: 1.5rem !important; height: 1.5rem !important; }
+svg.w-7, svg.h-7 { width: 1.75rem !important; height: 1.75rem !important; }
+svg.w-8, svg.h-8 { width: 2rem !important; height: 2rem !important; }
+
+:root {
+  --primary: #4F46E5;
+  --primary-light: #EEF2FF;
+  --primary-hover: #4338CA;
+  --secondary: #0284C7;
+  --secondary-light: #F0F9FF;
+  --accent-emerald: #10B981;
+  --accent-amber: #F59E0B;
+  --accent-rose: #EF4444;
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --border-light: #E2E8F0;
+  --border-focus: #C7D2FE;
+  --text-main: #0F172A;
+  --text-secondary: #475569;
+  --text-muted: #94A3B8;
+  --shadow-soft: 0 4px 20px -2px rgba(99, 102, 241, 0.08), 0 2px 6px -1px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 10px 25px -5px rgba(15, 23, 42, 0.06), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+  --shadow-hover: 0 20px 30px -10px rgba(79, 70, 229, 0.15), 0 8px 10px -4px rgba(15, 23, 42, 0.04);
+}
+
+/* Base Body Setup */
+body {
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(14, 165, 233, 0.07) 0px, transparent 50%),
+    radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.04) 0px, transparent 50%);
+  background-attachment: fixed;
+}
+
+/* Glassmorphism Navigation */
+.arth-navbar {
+  background: rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border-light);
+}
+
+/* Custom Soft Elevation */
+.arth-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-light);
+  box-shadow: var(--shadow-card);
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arth-card:hover {
+  border-color: #CBD5E1;
+}
+
+.arth-interactive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--border-focus);
+}
+
+/* Custom Clean Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Camera Container & Video Viewport */
+.camera-stage {
+  position: relative;
+  border-radius: 1.25rem;
+  overflow: hidden;
+  background: linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 100%);
+  aspect-ratio: 16 / 10;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.camera-stage video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.camera-stage canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Scanner Laser Sweep Animation */
+.scanner-grid {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(rgba(79, 70, 229, 0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(79, 70, 229, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.scanner-laser {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, #4F46E5 50%, transparent 100%);
+  box-shadow: 0 0 12px #6366F1;
+  animation: scanLaser 3.5s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes scanLaser {
+  0% { top: 6%; opacity: 0.2; }
+  50% { opacity: 0.9; }
+  100% { top: 92%; opacity: 0.2; }
+}
+
+/* Pulsing Recording / Live Badge */
+.pulse-emerald {
+  animation: pulseGreen 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulseGreen {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(1.1); }
+}
+
+/* Audio Waveform Bar Animation */
+.waveform-bar {
+  animation: waveBar 1.2s ease-in-out infinite;
+}
+.waveform-bar:nth-child(2) { animation-delay: 0.2s; }
+.waveform-bar:nth-child(3) { animation-delay: 0.4s; }
+.waveform-bar:nth-child(4) { animation-delay: 0.1s; }
+.waveform-bar:nth-child(5) { animation-delay: 0.3s; }
+
+@keyframes waveBar {
+  0%, 100% { height: 6px; }
+  50% { height: 26px; }
+}
+
+/* Navigation Tab Active Indicator */
+.nav-pill-active {
+  background-color: #4F46E5 !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3) !important;
+}
+
+.nav-pill-inactive {
+  background-color: transparent;
+  color: #475569;
+}
+.nav-pill-inactive:hover {
+  background-color: #F1F5F9;
+  color: #0F172A;
+}
+
+/* Hand Gesture Skeleton Visualizer Card */
+.gesture-preview-box {
+  background: radial-gradient(circle at center, #FFFFFF 0%, #F8FAFC 100%);
+  border: 1px dashed #CBD5E1;
+  border-radius: 1rem;
+}
+
+/* Badge Glows */
+.badge-subtle-indigo {
+  background-color: #EEF2FF;
+  color: #4338CA;
+  border: 1px solid #E0E7FF;
+}
+
+.badge-subtle-emerald {
+  background-color: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.badge-subtle-amber {
+  background-color: #FFFBEB;
+  color: #92400E;
+  border: 1px solid #FDE68A;
+}
+
+.badge-subtle-rose {
+  background-color: #FFF1F2;
+  color: #9F1239;
+  border: 1px solid #FECDD3;
+}
+
+/* Two-Way Chat Bubbles */
+.chat-bubble-hearing {
+  background: linear-gradient(135deg, #4F46E5 0%, #4338CA 100%);
+  color: #FFFFFF;
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+}
+
+.chat-bubble-deaf {
+  background: #FFFFFF;
+  color: #0F172A;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+/* Interactive Slider */
+input[type="range"] {
+  accent-color: #4F46E5;
+}
+
+/* SOS Urgent Pulsing Card */
+.sos-card {
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.sos-card:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 12px 24px -6px rgba(239, 68, 68, 0.15);
+}
+
+/* Accessible Font Sizing Support */
+body.font-scale-lg {
+  font-size: 1.125rem;
+}
+body.font-scale-xl {
+  font-size: 1.25rem;
+}
+
+/* High Contrast Light Mode Option */
+body.high-contrast-light {
+  --bg-page: #FFFFFF;
+  --bg-card: #FFFFFF;
+  --border-light: #94A3B8;
+  --text-main: #000000;
+  --text-secondary: #1E293B;
+  background-image: none !important;
+}
+
+body.high-contrast-light .arth-card {
+  border: 2px solid #000000 !important;
+  box-shadow: 0 4px 0 #000000 !important;
+}
+
+/* Floating Side Feature Dock */
+.side-feature-dock {
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  box-shadow: 0 12px 32px -4px rgba(79, 70, 229, 0.12), 0 4px 12px -2px rgba(15, 23, 42, 0.08);
+  border-radius: 1.25rem;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.side-feature-dock:hover {
+  box-shadow: 0 20px 40px -4px rgba(79, 70, 229, 0.18);
+}
+
+/* Feature Slide-Over Drawer (Left Side) */
+.feature-drawer-left {
+  background-color: #FFFFFF;
+  box-shadow: 14px 0 45px -5px rgba(15, 23, 42, 0.18);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}

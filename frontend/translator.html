@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARTH • AI Sign Language Translator</title>
+  <!-- Strict Authentication Guard: Access restricted to signed-in users -->
+  <script>
+    (function() {
+      const token = localStorage.getItem('arth_jwt_token');
+      const user = localStorage.getItem('arth_user_profile');
+      if (!token || !user) {
+        try {
+          sessionStorage.setItem('arth_auth_redirect', window.location.href);
+        } catch (e) {}
+        window.location.replace('index.html?auth_required=1');
+      }
+    })();
+  </script>
+  <!-- Local Tailwind CSS (Offline Ready) -->
+  <script src="tailwindcss.min.js"></script>
+  <!-- ARTH Client REST API (Backend Bridge) -->
+  <script src="api_client.js"></script>
+  <!-- MediaPipe On-Device Hand Landmark AI Tracker (Offline Local + CDN Fallback) -->
+  <script src="mediapipe_camera.js"></script>
+  <script src="mediapipe_hands.js"></script>
+  <script>
+    if (typeof Hands === 'undefined') {
+      document.write('<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"><\\/script>');
+      document.write('<script src="https://cdn.jsdelivr.net/npm/@mediapipe/hands/hands.js" crossorigin="anonymous"><\\/script>');
+    }
+  </script>
+  <!-- Modern Clean Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet (Strict Light Theme) -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900 bg-slate-50 text-slate-900">
+
+  <!-- ================= TOP NAVIGATION BAR ================= -->
+  <header class="arth-navbar sticky top-0 z-40 px-4 lg:px-8 py-3.5 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo & Clean Title -->
+      <a href="index.html" class="flex items-center gap-3 group transition hover:opacity-90">
+        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition">
+          <svg width="24" height="24" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl font-extrabold tracking-tight text-slate-900">ARTH</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">AI Translator</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">Two-Way Sign Language & Voice Translation</p>
+        </div>
+      </a>
+
+      <!-- Main Navigation Tabs (Desktop) -->
+      <nav class="hidden lg:flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
+        <button data-tab-target="camera-translate" class="nav-pill-active px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+          <span>Sign ➔ Voice</span>
+        </button>
+        <button data-tab-target="reverse-translate" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+          <span>Voice ➔ Sign</span>
+        </button>
+        <button data-tab-target="duo-chat" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+          <span>Live Conversation</span>
+        </button>
+        <button data-tab-target="shiksha" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+          <span>Practice</span>
+        </button>
+        <button data-tab-target="sos" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2 text-rose-600">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+          <span>Emergency SOS</span>
+        </button>
+        <button data-tab-target="dictionary" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          <span>Dictionary</span>
+        </button>
+      </nav>
+
+      <!-- Right Controls: Dialect, Auth & Settings -->
+      <div class="flex items-center gap-2">
+        <button id="dialectSelector" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5" title="Switch between ASL and ISL">
+          <span>ASL Mode</span>
+        </button>
+        <div class="arth-auth-container flex items-center gap-2">
+          <button onclick="document.getElementById('translatorAuthModal').classList.remove('hidden')" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
+            Sign In
+          </button>
+        </div>
+        <button onclick="document.getElementById('settingsModal').classList.remove('hidden')" class="p-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition" title="Open Settings">
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Nav Bar -->
+    <div class="lg:hidden mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-1 overflow-x-auto text-xs font-semibold">
+      <button data-tab-target="camera-translate" class="nav-pill-active px-3 py-1.5 rounded-lg whitespace-nowrap">Sign ➔ Voice</button>
+      <button data-tab-target="reverse-translate" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Voice ➔ Sign</button>
+      <button data-tab-target="duo-chat" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Conversation</button>
+      <button data-tab-target="shiksha" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Practice</button>
+      <button data-tab-target="sos" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap text-rose-600">SOS</button>
+      <button data-tab-target="dictionary" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Dictionary</button>
+    </div>
+  </header>
+
+
+  <!-- ================= MAIN CONTENT ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 1. SIGN TO VOICE TRANSLATOR (CAMERA ➔ SPEECH & TEXT)          -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-camera-translate" class="tab-view-container grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left: Camera Preview (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        
+        <div class="arth-card p-4 bg-white">
+          <!-- Status Bar -->
+          <div class="flex items-center justify-between mb-3 px-1">
+            <div class="flex items-center gap-2" id="camStatusBadge">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-emerald"></span>
+              <span class="text-emerald-700 font-bold text-xs uppercase tracking-wide">AI Hand Tracking Active</span>
+            </div>
+            <div class="flex items-center gap-2 text-xs">
+              <button id="btnToggleMesh" class="px-2.5 py-1 rounded-lg border border-slate-200 text-indigo-700 font-semibold bg-indigo-50/70 hover:bg-indigo-50 transition">
+                Mesh Overlay: ON
+              </button>
+              <button id="btnMirrorCamera" class="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition" title="Flip Mirror">
+                <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Video / Canvas Viewport -->
+          <div class="camera-stage relative rounded-xl overflow-hidden bg-slate-100 border border-slate-200 shadow-inner">
+            <div class="scanner-grid"></div>
+            <div class="scanner-laser"></div>
+
+            <video id="cameraVideo" autoplay playsinline muted style="transform: scaleX(-1);"></video>
+            <canvas id="cameraOverlayCanvas"></canvas>
+
+            <!-- Guide Box -->
+            <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div class="w-56 h-56 border-2 border-dashed border-indigo-400/50 rounded-2xl relative">
+                <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-white px-2.5 py-0.5 rounded-full text-[10px] font-bold text-indigo-700 border border-indigo-200 uppercase tracking-wider">
+                  Hold Hand Here
+                </span>
+              </div>
+            </div>
+
+            <!-- Bottom Floating Control Bar -->
+            <div class="absolute bottom-3 inset-x-3 flex items-center justify-between p-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm">
+              <button id="btnToggleCamera" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span>Start Camera</span>
+              </button>
+
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-semibold text-slate-600">Hold Lock:</span>
+                <div class="w-20 bg-slate-200 h-2 rounded-full overflow-hidden">
+                  <div id="stabilityBar" class="bg-indigo-600 h-full rounded-full transition-all" style="width: 80%"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Quick Test Simulator Buttons -->
+          <div class="mt-4 pt-3 border-t border-slate-100">
+            <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">
+              Instant Test Gestures (Click any to test without camera):
+            </span>
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <button data-trigger-sign="Hello / Welcome" class="px-3 py-1 rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200 text-xs font-semibold hover:bg-indigo-100 transition">
+                👋 Hello
+              </button>
+              <button data-trigger-sign="Thank You" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                🙏 Thank You
+              </button>
+              <button data-trigger-sign="Help" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                🆘 Help
+              </button>
+              <button data-trigger-sign="Water" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                💧 Water
+              </button>
+              <button data-trigger-sign="I Love You" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                🤟 I Love You
+              </button>
+              <button data-trigger-sign="Yes" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                👍 Yes
+              </button>
+              <button data-trigger-sign="No" class="px-3 py-1 rounded-lg bg-slate-50 text-slate-700 border border-slate-200 text-xs font-semibold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                ✋ No
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Right: Translation Output & Sentence Builder (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <!-- Live Detected Output Card -->
+        <div class="arth-card p-5 bg-white border border-indigo-100">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold uppercase tracking-wider text-indigo-600 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-600 animate-ping"></span>
+              Detected Sign
+            </span>
+            <span id="liveConfidenceBadge" class="badge-subtle-emerald px-2.5 py-0.5 rounded-full text-xs font-bold">
+              98% Match
+            </span>
+          </div>
+
+          <h2 id="liveDetectedText" class="text-3xl font-extrabold text-slate-900 tracking-tight mb-1">
+            Hello / Welcome
+          </h2>
+
+          <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-600 flex items-center justify-between mb-4">
+            <div>
+              <span class="font-bold text-slate-700">Hand Posture:</span>
+              <span id="liveHandPose" class="ml-1 text-slate-600">Open flat palm waving gently</span>
+            </div>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex items-center gap-2">
+            <button onclick="ArthUI.appendCurrentSignToBuffer()" class="flex-1 py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-xs transition flex items-center justify-center gap-2">
+              <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              <span>Add to Sentence</span>
+            </button>
+            <button onclick="ArthUI.speakText(ArthState.currentDetectedSign.split('/')[0])" class="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition" title="Speak Word">
+              <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Sentence Builder Card -->
+        <div class="arth-card p-5 bg-white flex flex-col justify-between flex-1">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <h3 class="font-extrabold text-slate-900 text-sm">Constructed Sentence</h3>
+                <span id="wordCountBadge" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">1 Words</span>
+              </div>
+              
+              <!-- Voice Indicator -->
+              <div id="speechWaveIndicator" class="hidden flex items-center gap-1 text-indigo-600">
+                <span class="w-1 bg-indigo-600 rounded-full waveform-bar"></span>
+                <span class="w-1 bg-indigo-600 rounded-full waveform-bar"></span>
+                <span class="w-1 bg-indigo-600 rounded-full waveform-bar"></span>
+                <span class="text-xs font-bold text-indigo-600 ml-1">Speaking...</span>
+              </div>
+            </div>
+
+            <!-- Word Stream Box -->
+            <div id="sentenceBufferContainer" class="min-h-[110px] p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex flex-wrap items-center gap-2 content-start">
+              <!-- Words rendered by app.js -->
+            </div>
+          </div>
+
+          <!-- Bottom Action Buttons -->
+          <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
+            <button onclick="ArthUI.speakSentence()" class="flex-1 py-2 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+              <svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+              <span>Speak Sentence</span>
+            </button>
+            <button onclick="ArthUI.copySentenceBuffer()" class="py-2 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition">
+              Copy
+            </button>
+            <button onclick="ArthUI.sendDeafBufferToChat()" class="py-2 px-3 rounded-xl border border-indigo-200 bg-indigo-50 text-indigo-700 font-semibold text-xs transition">
+              Post to Chat
+            </button>
+            <button onclick="ArthUI.clearSentenceBuffer()" class="p-2 rounded-xl border border-slate-200 hover:bg-rose-50 text-slate-500 hover:text-rose-600 transition" title="Clear">
+              <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 2. VOICE/TEXT TO SIGN LANGUAGE TRANSLATOR                     -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-reverse-translate" class="tab-view-container hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <!-- Left: Input & Speech Recognition (5 cols) -->
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        
+        <div class="arth-card p-5 bg-white">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="font-extrabold text-slate-900 text-base">Input English Speech or Text</h3>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Voice to Sign</span>
+          </div>
+          <p class="text-xs text-slate-500 mb-3">
+            Speak into your microphone or type English words to see the animated sign language breakdown.
+          </p>
+
+          <div class="relative mb-3">
+            <textarea id="reverseTextInput" rows="4" class="w-full p-3.5 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-xs text-slate-800 placeholder-slate-400 resize-none font-medium" placeholder="E.g., Hello, I need water and a doctor..."></textarea>
+            
+            <button id="btnStartMic" class="absolute bottom-2.5 right-2.5 p-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 transition" title="Click to speak">
+              <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+            </button>
+          </div>
+
+          <!-- Quick Test Prompts -->
+          <div class="mb-4">
+            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">Quick Samples:</span>
+            <div class="flex flex-wrap gap-1.5">
+              <button onclick="document.getElementById('reverseTextInput').value='Hello thank you'; ArthUI.processReverseInput();" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 transition">
+                "Hello thank you"
+              </button>
+              <button onclick="document.getElementById('reverseTextInput').value='I need water'; ArthUI.processReverseInput();" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 transition">
+                "I need water"
+              </button>
+              <button onclick="document.getElementById('reverseTextInput').value='Doctor help'; ArthUI.processReverseInput();" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 transition">
+                "Doctor help"
+              </button>
+              <button onclick="document.getElementById('reverseTextInput').value='I love you friend'; ArthUI.processReverseInput();" class="text-xs px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-700 border border-slate-200 transition">
+                "I love you friend"
+              </button>
+            </div>
+          </div>
+
+          <button onclick="ArthUI.processReverseInput()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+            <span>Generate Sign Language</span>
+            <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- Right: Sign Visualizer (7 cols) -->
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        
+        <div class="arth-card p-5 bg-white flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div>
+                <span class="text-xs font-bold text-indigo-600 uppercase tracking-wider">Visual Sign Player</span>
+                <h3 id="reverseCurrentWordTitle" class="text-2xl font-black text-slate-900 tracking-tight">
+                  HELLO
+                </h3>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500 font-semibold">Speed:</span>
+                <select onchange="ArthState.reverseSpeed = parseFloat(this.value)" class="text-xs p-1.5 rounded-lg border border-slate-200 bg-slate-50 font-bold text-slate-700">
+                  <option value="0.5">0.5x Slow</option>
+                  <option value="1.0" selected>1.0x Normal</option>
+                  <option value="1.5">1.5x Fast</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Canvas Stage -->
+            <div class="w-full h-72 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative flex items-center justify-center">
+              <canvas id="reverseVisualizerCanvas" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <!-- Description & Tips -->
+          <div class="mt-3 p-3 rounded-xl bg-indigo-50/60 border border-indigo-100">
+            <p id="reverseCurrentWordDesc" class="text-xs font-bold text-slate-800 mb-1">
+              Open flat palm at forehead or chest waving gently.
+            </p>
+            <p id="reverseCurrentWordTips" class="text-xs text-indigo-700 flex items-center gap-1">
+              <span>Keep fingers together and wave smoothly from the wrist.</span>
+            </p>
+          </div>
+
+          <!-- Timeline Controls -->
+          <div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+            <div class="flex items-center gap-1.5">
+              <button onclick="ArthUI.stepReverseTimeline(-1)" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700" title="Previous Word">
+                <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+              </button>
+              <button id="btnPlayReverse" onclick="ArthUI.toggleReversePlay()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition">
+                <svg width="14" height="14" class="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                <span>Play Sequence</span>
+              </button>
+              <button onclick="ArthUI.stepReverseTimeline(1)" class="p-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700" title="Next Word">
+                <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+              </button>
+            </div>
+
+            <button onclick="ArthUI.quickPracticeSign(ArthState.reverseTokens[ArthState.reverseCurrentIndex] || 'hello')" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-white hover:bg-indigo-50 text-indigo-700 text-xs font-bold transition">
+              Practice in Camera ➔
+            </button>
+          </div>
+
+        </div>
+
+        <!-- Sequential Word Cards -->
+        <div class="arth-card p-4 bg-white">
+          <span class="text-xs font-bold text-slate-700 uppercase tracking-wider block mb-2">Sentence Breakdown Cards:</span>
+          <div id="reverseTimelineCards" class="flex items-center gap-2.5 overflow-x-auto pb-1">
+            <!-- Cards rendered by app.js -->
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 3. TWO-WAY LIVE DIALOGUE (HEARING <-> DEAF CONVERSATION)      -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-duo-chat" class="tab-view-container hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <div class="lg:col-span-12 arth-card p-5 bg-white flex flex-col h-[650px]">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Live Dialogue Bridge</h2>
+            <p class="text-xs text-slate-500">Real-time chat between a Hearing Person (Voice/Typing) and a Deaf Person (Sign Language).</p>
+          </div>
+          <button onclick="ArthUI.exportChatTranscript()" class="px-3 py-1.5 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold flex items-center gap-1.5 transition">
+            Export Transcript
+          </button>
+        </div>
+
+        <div id="chatMessagesList" class="flex-1 overflow-y-auto py-4 px-2">
+          <!-- Chat bubbles rendered by app.js -->
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 grid grid-cols-1 md:grid-cols-2 gap-3">
+          
+          <!-- Hearing Input -->
+          <div class="p-3 rounded-xl bg-indigo-50/50 border border-indigo-100">
+            <span class="text-xs font-bold text-indigo-700 block mb-1.5">Hearing Participant (Voice or Typing):</span>
+            <div class="flex items-center gap-2">
+              <input id="chatHearingInput" type="text" placeholder="Type a message..." class="flex-1 p-2 rounded-lg bg-white border border-slate-200 text-xs font-medium text-slate-800 outline-none focus:border-indigo-500">
+              <button onclick="ArthUI.sendChatMessage('hearing')" class="px-3.5 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+                Send
+              </button>
+            </div>
+          </div>
+
+          <!-- Deaf Input -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <span class="text-xs font-bold text-slate-800 block mb-1.5">Deaf Participant (Signed Sentence):</span>
+            <div class="flex items-center gap-2">
+              <button onclick="ArthUI.sendDeafBufferToChat()" class="flex-1 py-2 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition flex items-center justify-center gap-1.5">
+                <span>Send Camera Signed Sentence</span>
+              </button>
+              <button onclick="ArthUI.switchTab('camera-translate')" class="px-3 py-2 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition">
+                Open Camera
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 4. PRACTICE MODE (LEARN SIGN LANGUAGE)                        -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-shiksha" class="tab-view-container hidden grid grid-cols-1 lg:grid-cols-12 gap-6">
+      
+      <div class="lg:col-span-5 flex flex-col gap-4">
+        <div class="arth-card p-5 bg-white">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs font-bold text-indigo-600 uppercase tracking-widest">Sign Challenge</span>
+            <span id="shikshaStreakBadge" class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full">
+              🔥 4 Day Streak
+            </span>
+          </div>
+
+          <h2 id="shikshaTargetTitle" class="text-2xl font-black text-slate-900 mb-1">
+            Hello / Welcome
+          </h2>
+          <p id="shikshaTargetDesc" class="text-xs text-slate-600 leading-relaxed mb-4">
+            Open palm at forehead or chest height waving gently forward.
+          </p>
+
+          <div class="mb-4">
+            <h4 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Instructions:</h4>
+            <ul id="shikshaTargetSteps" class="space-y-1.5 text-xs text-slate-600">
+              <!-- Steps rendered by app.js -->
+            </ul>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <button onclick="ArthUI.selectNextShikshaSign()" class="flex-1 py-2 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs transition">
+              Next Practice Sign
+            </button>
+            <button onclick="ArthUI.speakText(document.getElementById('shikshaTargetTitle').textContent)" class="p-2 rounded-lg border border-slate-200 bg-slate-50 hover:bg-slate-100 text-slate-700">
+              <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:col-span-7 flex flex-col gap-4">
+        <div class="arth-card p-5 bg-white flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <h3 class="font-extrabold text-slate-900 text-base">Accuracy Evaluation</h3>
+              <span class="text-xs font-semibold px-2 py-0.5 rounded bg-indigo-50 text-indigo-700">Realtime Assessment</span>
+            </div>
+
+            <div class="w-full h-64 rounded-xl bg-slate-50 border border-slate-200 overflow-hidden relative flex items-center justify-center">
+              <canvas id="shikshaCanvas" class="w-full h-full"></canvas>
+            </div>
+          </div>
+
+          <div class="mt-4 p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="flex items-center justify-between mb-1.5">
+              <span class="text-xs font-bold text-slate-700">Skeleton Alignment:</span>
+              <span id="shikshaScoreText" class="text-base font-black text-indigo-600">0%</span>
+            </div>
+            <div class="w-full bg-slate-200 h-2.5 rounded-full overflow-hidden mb-1.5">
+              <div id="shikshaScoreMeter" class="bg-gradient-to-r from-indigo-500 to-emerald-500 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+            <p id="shikshaFeedbackText" class="text-xs text-slate-500">
+              Align your hand inside the target circle to evaluate accuracy.
+            </p>
+          </div>
+
+          <div class="mt-3 pt-3 border-t border-slate-100">
+            <button onclick="ArthUI.testPracticeGesture()" class="w-full py-2.5 px-4 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+              Evaluate My Sign Now
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 5. EMERGENCY SOS DECK                                         -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-sos" class="tab-view-container hidden flex flex-col gap-4">
+      
+      <div class="arth-card p-5 bg-gradient-to-r from-rose-50/70 via-white to-amber-50/50 border border-rose-200 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div>
+          <h2 class="text-lg font-extrabold text-slate-900 flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-rose-600 animate-pulse"></span>
+            Emergency Assistance Cards
+          </h2>
+          <p class="text-xs text-slate-600">
+            Tap any card for a full-screen display and loud voice broadcast for bystanders in public emergencies.
+          </p>
+        </div>
+        <span class="text-xs font-bold text-rose-700 bg-rose-100/70 px-3 py-1 rounded-lg border border-rose-200 self-start md:self-auto">
+          🚨 1-Tap Broadcast
+        </span>
+      </div>
+
+      <div id="sosCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- SOS cards rendered by app.js -->
+      </div>
+
+    </section>
+
+
+    <!-- ------------------------------------------------------------- -->
+    <!-- 6. SIGN DICTIONARY & ALPHABET                                 -->
+    <!-- ------------------------------------------------------------- -->
+    <section id="view-dictionary" class="tab-view-container hidden flex flex-col gap-4">
+      
+      <div class="arth-card p-5 bg-white">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 mb-3">
+          <div>
+            <h2 class="text-lg font-extrabold text-slate-900">Sign Language Dictionary</h2>
+            <p class="text-xs text-slate-500">Search signs, everyday words, and full A-Z fingerspelling.</p>
+          </div>
+
+          <div class="relative w-full md:w-72">
+            <input id="dictSearchInput" type="text" placeholder="Search sign (e.g. Hello, Water, Help)..." class="w-full pl-8 pr-3 py-2 rounded-lg border border-slate-200 text-xs text-slate-800 outline-none focus:border-indigo-500">
+            <svg width="16" height="16" class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs font-semibold">
+          <button data-dict-cat="all" class="px-3 py-1 rounded-lg bg-indigo-600 text-white shadow-xs">All Signs</button>
+          <button data-dict-cat="greetings" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Greetings</button>
+          <button data-dict-cat="emergency" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Emergency</button>
+          <button data-dict-cat="essentials" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Daily Essentials</button>
+          <button data-dict-cat="questions" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Questions</button>
+          <button data-dict-cat="emotions" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Emotions</button>
+          <button data-dict-cat="alphabet" class="px-3 py-1 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200 transition">Alphabet A-Z</button>
+        </div>
+      </div>
+
+      <div id="dictionaryCardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered by app.js -->
+      </div>
+
+    </section>
+
+  </main>
+
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="mt-auto border-t border-slate-200 bg-white py-4 px-4 text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+      <div class="font-medium text-slate-700">
+        <strong>ARTH</strong> • Assistive AI Sign Language Translation
+      </div>
+      <div class="flex items-center gap-3">
+        <span class="flex items-center gap-1 text-emerald-600 font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span> 100% Client-Side Privacy
+        </span>
+        <span>WCAG AAA Accessible</span>
+      </div>
+    </div>
+  </footer>
+
+
+  <!-- ================= MODALS ================= -->
+
+  <!-- Settings Modal -->
+  <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+    <div class="arth-card p-5 bg-white max-w-md w-full shadow-xl">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 mb-4">
+        <h3 class="font-extrabold text-slate-900 text-base">Settings & Accessibility</h3>
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="p-1 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700">
+          <svg width="20" height="20" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="space-y-4 text-xs">
+        <div>
+          <label class="font-semibold text-slate-800 block mb-1">Synthesizer Voice (Natural Accent):</label>
+          <div class="flex items-center gap-2">
+            <select id="settingVoiceSelect" class="flex-1 p-2 rounded-xl border border-slate-200 bg-slate-50 font-semibold text-slate-800 text-xs outline-none focus:border-indigo-500">
+              <option value="">Auto-Detect Best Natural English Voice</option>
+            </select>
+            <button type="button" onclick="ArthUI.testCurrentVoice()" class="px-3 py-2 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 font-bold text-xs whitespace-nowrap transition">
+              🔊 Test
+            </button>
+          </div>
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-semibold text-slate-800">Voice Speed:</label>
+            <span id="speechRateVal" class="font-bold text-indigo-600">1.0x</span>
+          </div>
+          <input id="settingSpeechRate" type="range" min="0.5" max="1.8" step="0.1" value="1.0" class="w-full">
+        </div>
+
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <label class="font-semibold text-slate-800">Voice Pitch:</label>
+            <span id="speechPitchVal" class="font-bold text-indigo-600">1.0</span>
+          </div>
+          <input id="settingSpeechPitch" type="range" min="0.5" max="1.5" step="0.1" value="1.0" class="w-full">
+        </div>
+
+        <div class="flex items-center justify-between py-2 border-t border-slate-100">
+          <div>
+            <h4 class="font-semibold text-slate-800">Sound Feedback Chimes</h4>
+            <p class="text-slate-400 text-[11px]">Audio tone when a sign is detected</p>
+          </div>
+          <input id="settingSoundFx" type="checkbox" checked class="w-4 h-4 accent-indigo-600">
+        </div>
+
+        <div class="flex items-center justify-between py-2 border-t border-slate-100">
+          <div>
+            <h4 class="font-semibold text-slate-800">High Contrast Mode</h4>
+            <p class="text-slate-400 text-[11px]">High contrast borders for bright screens</p>
+          </div>
+          <input id="settingHighContrast" type="checkbox" class="w-4 h-4 accent-indigo-600">
+        </div>
+
+        <div class="flex items-center justify-between py-2 border-t border-slate-100">
+          <div>
+            <h4 class="font-semibold text-slate-800">Font Scaling</h4>
+            <p class="text-slate-400 text-[11px]">Adjust text size for easier reading</p>
+          </div>
+          <select id="settingFontSize" class="p-1 rounded-lg border border-slate-200 bg-slate-50 font-semibold text-slate-700">
+            <option value="normal" selected>Normal</option>
+            <option value="large">Large (+15%)</option>
+            <option value="xl">Extra Large (+25%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="mt-5 pt-3 border-t border-slate-100">
+        <button onclick="document.getElementById('settingsModal').classList.add('hidden')" class="w-full py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs transition">
+          Save Settings
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Emergency Flashcard Modal -->
+  <div id="sosBroadcastModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-rose-950/60 backdrop-blur-sm">
+    <div class="arth-card p-6 bg-white max-w-lg w-full border-4 border-rose-500 shadow-2xl text-center relative">
+      <button onclick="ArthUI.closeSOSModal()" class="absolute top-3 right-3 p-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600">
+        <svg width="20" height="20" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <span class="text-xs font-black uppercase tracking-widest text-rose-600 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full inline-block mb-2">
+        EMERGENCY NOTICE
+      </span>
+
+      <h2 id="sosModalTitle" class="text-2xl font-black text-slate-900 mb-3">
+        Medical Assistance Needed
+      </h2>
+
+      <div class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-slate-900 font-bold text-base leading-relaxed mb-4">
+        "<span id="sosModalPhrase">I am unwell and require urgent medical help or an ambulance.</span>"
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button onclick="ArthUI.speakText(document.getElementById('sosModalPhrase').textContent)" class="flex-1 py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs transition flex items-center justify-center gap-2">
+          <span>Repeat Audio Broadcast</span>
+        </button>
+        <button onclick="ArthUI.closeSOSModal()" class="py-2.5 px-4 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs transition">
+          Dismiss
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="arthToast" class="hidden fixed bottom-6 right-6 z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none">
+    <div class="px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold flex items-center gap-2 shadow-lg">
+      <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+      <span id="arthToastText">Notification</span>
+    </div>
+  </div>
+
+  <!-- Auth Modal (Sign In / Sign Up) -->
+  <div id="translatorAuthModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="arth-card w-full max-w-md p-6 sm:p-8 bg-white border border-slate-200 shadow-2xl rounded-3xl relative">
+      <button onclick="document.getElementById('translatorAuthModal').classList.add('hidden')" class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+        <svg width="20" height="20" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <div class="text-center mb-5">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 font-bold text-xl border border-indigo-100 shadow-xs">
+          👤
+        </div>
+        <h3 class="text-2xl font-black text-slate-900 tracking-tight">ARTH Cloud Sync</h3>
+        <p class="text-xs text-slate-500 font-medium mt-1">Sign in to save translations, track learning streak & sync emergency contacts</p>
+      </div>
+
+      <form onsubmit="handleTranslatorAuth(event)" class="space-y-3.5 text-xs font-semibold">
+        <div class="space-y-1">
+          <label class="block text-slate-700 font-bold">Email Address</label>
+          <input type="email" id="transAuthEmail" required placeholder="demo@arth.ai" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800">
+        </div>
+        <div class="space-y-1">
+          <label class="block text-slate-700 font-bold">Password</label>
+          <input type="password" id="transAuthPassword" required placeholder="••••••••" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800">
+        </div>
+
+        <button type="submit" id="btnTransAuthSubmit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md shadow-indigo-200 transition mt-2">
+          Sign In to Database
+        </button>
+
+        <div class="mt-3 p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-slate-700 text-[11px] flex items-center justify-between">
+          <span><strong>Demo Account:</strong> demo@arth.ai / password123</span>
+          <button type="button" onclick="document.getElementById('transAuthEmail').value='demo@arth.ai'; document.getElementById('transAuthPassword').value='password123';" class="underline font-bold text-indigo-700 hover:text-indigo-900 ml-2">Auto-Fill</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    async function handleTranslatorAuth(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnTransAuthSubmit');
+      const email = document.getElementById('transAuthEmail').value.trim();
+      const password = document.getElementById('transAuthPassword').value;
+      btn.innerHTML = `<span class="animate-spin inline-block mr-2">⟳</span> Connecting...`;
+
+      try {
+        await ArthAPI.login(email, password);
+        btn.innerHTML = `✓ Connected!`;
+        setTimeout(() => {
+          document.getElementById('translatorAuthModal').classList.add('hidden');
+          window.location.reload();
+        }, 300);
+      } catch (err) {
+        alert(err.message || "Login failed. Please verify credentials.");
+        btn.textContent = "Sign In to Database";
+      }
+    }
+  </script>
+
+  <!-- Scripts -->
+  <script src="api_client.js"></script>
+  <script src="signs_data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

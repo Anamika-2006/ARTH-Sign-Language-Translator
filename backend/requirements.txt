@@ -1,0 +1,9 @@
+# ARTH AI Platform - Dependencies
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pyjwt>=2.9.0
+bcrypt>=4.2.0
+pydantic>=2.8.0
+pydantic[email]>=2.8.0
+python-multipart>=0.0.9
+requests>=2.31.0

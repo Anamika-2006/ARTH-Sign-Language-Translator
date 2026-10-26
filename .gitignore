@@ -1,0 +1,33 @@
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# SQLite local databases
+*.db
+*.sqlite3
+*.db-journal
+
+# Environment and sensitive configs
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Temporary and browser test directories
+.edge_temp*
+shot.png
+*.log
+
+# Editor configurations
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+Thumbs.db
+.DS_Store

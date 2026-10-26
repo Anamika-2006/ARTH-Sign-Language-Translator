@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ARTH • AI Sign Language Translator & Voice Bridge</title>
+  <!-- Local Tailwind CSS (Offline Ready) -->
+  <script src="tailwindcss.min.js"></script>
+  <!-- ARTH Client REST API (Backend Bridge) -->
+  <script src="api_client.js"></script>
+  <!-- Plus Jakarta Sans Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="min-h-screen flex flex-col antialiased bg-slate-50 text-slate-900 selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- ================= HEADER & NAVIGATION ================= -->
+  <header class="arth-navbar sticky top-0 z-40 px-4 lg:px-8 py-3.5 bg-white/90 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
+      
+      <!-- Brand Logo -->
+      <a href="index.html" class="flex items-center gap-3 group transition">
+        <!-- Custom ARTH SVG Logo -->
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-sky-500 text-white flex items-center justify-center shadow-md shadow-indigo-200 group-hover:scale-105 transition-transform flex-shrink-0">
+          <svg width="24" height="24" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+          </svg>
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-2xl font-black tracking-tight text-slate-900">ARTH</span>
+            <span class="text-xs font-bold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">v2.4 AI</span>
+          </div>
+          <p class="text-xs text-slate-500 font-medium hidden sm:block">Bridging Silence & Speech</p>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-600">
+        <a href="#features" class="hover:text-indigo-600 transition">Features</a>
+        <a href="#interactive-demo" class="hover:text-indigo-600 transition">Live Demo</a>
+        <a href="#how-it-works" class="hover:text-indigo-600 transition">How It Works</a>
+        <a href="#impact" class="hover:text-indigo-600 transition">Impact</a>
+        <a href="#faq" class="hover:text-indigo-600 transition">FAQ</a>
+      </nav>
+
+      <!-- Right Header Actions: Sign In / Sign Up & Launch App -->
+      <div class="flex items-center gap-2.5">
+        <div class="arth-auth-container flex items-center gap-2">
+          <button onclick="openAuthModal('signin')" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-indigo-600 hover:bg-slate-100 transition">
+            Sign In
+          </button>
+          <button onclick="openAuthModal('signup')" class="hidden sm:inline-flex px-3.5 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
+            Sign Up Free
+          </button>
+        </div>
+        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-md shadow-indigo-200 transition flex items-center gap-1.5 cursor-pointer">
+          <span>Launch App</span>
+          <svg width="14" height="14" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= SLEEK LEFT-EDGE DRAWER TRIGGER (ZERO CONTENT OVERLAP) ================= -->
+  <div class="fixed left-0 top-1/2 -translate-y-1/2 z-40 hidden sm:block">
+    <button onclick="openFeatureDrawer(currentSelectedFeature || 'camera')" class="group flex items-center bg-white/95 hover:bg-indigo-600 text-slate-700 hover:text-white border-y border-r border-slate-200 shadow-xl hover:shadow-indigo-300/40 rounded-r-2xl py-4 px-2.5 transition-all" title="Click to view detailed feature guide">
+      <div class="flex flex-col items-center gap-1.5">
+        <span class="text-xl group-hover:scale-110 transition">⚡</span>
+        <span class="text-[10px] font-black uppercase tracking-wider [writing-mode:vertical-lr] rotate-180">APP FEATURES</span>
+      </div>
+    </button>
+  </div>
+
+  <!-- Mobile Floating Trigger Button (Left Bottom) -->
+  <button onclick="openFeatureDrawer('camera')" class="lg:hidden fixed bottom-5 left-5 z-40 px-4 py-3 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs shadow-xl flex items-center gap-2 border border-indigo-400">
+    <span class="text-base">✨</span>
+    <span>App Features (6)</span>
+  </button>
+
+  <!-- ================= HERO SECTION ================= -->
+  <section class="relative pt-14 pb-20 px-4 lg:px-8 overflow-hidden bg-gradient-to-b from-white via-indigo-50/20 to-slate-50">
+    
+    <!-- Background Ambient Glows -->
+    <div class="absolute -top-40 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-indigo-100/50 rounded-full blur-3xl pointer-events-none -z-10"></div>
+    <div class="absolute top-60 right-10 w-96 h-96 bg-sky-100/40 rounded-full blur-3xl pointer-events-none -z-10"></div>
+
+    <div class="max-w-6xl mx-auto text-center flex flex-col items-center">
+      
+      <!-- Eyebrow Badge -->
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-indigo-800 text-xs font-bold mb-6 shadow-xs">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>World’s Most Accessible Two-Way Sign Language AI</span>
+      </div>
+
+      <!-- Main Catchy Headline -->
+      <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black text-slate-900 tracking-tight leading-[1.18] mb-5 max-w-4xl">
+        Giving Silence a Voice.<br class="hidden sm:inline">
+        Giving Voice an <span class="bg-gradient-to-r from-indigo-600 via-indigo-500 to-sky-600 bg-clip-text text-transparent">Understanding.</span>
+      </h1>
+
+      <!-- Subtitle Description -->
+      <p class="text-sm sm:text-lg text-slate-600 font-medium max-w-2xl mb-8 leading-relaxed">
+        ARTH instantly bridges communication between the Deaf community and the hearing world. Translates camera sign gestures to spoken English voice, and voice to animated sign language in real time — 100% private and on-device.
+      </p>
+
+      <!-- Primary CTA Action Group -->
+      <div class="flex flex-col sm:flex-row items-center gap-3.5 w-full sm:w-auto mb-10">
+        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="w-full sm:w-auto px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-indigo-200 transition transform hover:-translate-y-0.5 flex items-center justify-center gap-2 cursor-pointer">
+          <span>Open Live Translator</span>
+          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+        </a>
+        <a href="#features" class="w-full sm:w-auto px-7 py-4 rounded-2xl border border-indigo-200 bg-indigo-50/70 hover:bg-indigo-100 text-indigo-700 font-bold text-sm shadow-xs transition flex items-center justify-center gap-2">
+          <span>Explore All 6 Features</span>
+          <span class="text-xs">⚡</span>
+        </a>
+        <button onclick="openAuthModal('signup')" class="w-full sm:w-auto px-6 py-4 rounded-2xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-sm shadow-xs transition flex items-center justify-center gap-2">
+          <svg width="16" height="16" class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+          <span>Create Free Account</span>
+        </button>
+      </div>
+
+      <!-- Trust Badges -->
+      <div class="flex flex-wrap items-center justify-center gap-6 text-xs font-semibold text-slate-500 mb-14">
+        <span class="flex items-center gap-1.5"><span class="text-emerald-500 font-bold">✓</span> 100% Free & Open-Access</span>
+        <span class="flex items-center gap-1.5"><span class="text-emerald-500 font-bold">✓</span> Zero Video Uploaded (100% Private)</span>
+        <span class="flex items-center gap-1.5"><span class="text-emerald-500 font-bold">✓</span> Supports ASL & ISL Dialects</span>
+        <span class="flex items-center gap-1.5"><span class="text-emerald-500 font-bold">✓</span> Sub-15ms AI Processing</span>
+      </div>
+
+      <!-- ================= HERO INTERACTIVE SIMULATOR (100% LIGHT THEME) ================= -->
+      <div id="interactive-demo" class="w-full max-w-4xl arth-card p-4 sm:p-6 bg-white border border-slate-200 shadow-xl rounded-3xl text-left">
+        
+        <div class="flex items-center justify-between pb-4 mb-4 border-b border-slate-100 flex-wrap gap-2">
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full bg-rose-400"></span>
+            <span class="w-3 h-3 rounded-full bg-amber-400"></span>
+            <span class="w-3 h-3 rounded-full bg-emerald-400"></span>
+            <span class="ml-2 text-xs font-bold text-slate-700">ARTH Live Interactive Simulator</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-[11px] font-bold border border-emerald-200">
+              ● 21 Landmarks Neural Tracker
+            </span>
+            <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="text-xs font-bold text-indigo-600 hover:underline cursor-pointer">Full Screen App ➔</a>
+          </div>
+        </div>
+
+        <!-- Split Preview: Simulated Camera & Instant Speech -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
+          
+          <!-- Left: Camera Preview Simulator (100% Light Theme!) -->
+          <div class="rounded-2xl bg-gradient-to-br from-indigo-50/70 via-slate-50 to-sky-50/50 border border-indigo-100 relative overflow-hidden h-72 flex items-center justify-center shadow-inner">
+            <!-- Simulated Skeleton Overlay Canvas -->
+            <canvas id="landingCanvas" class="w-full h-full"></canvas>
+            <div class="scanner-grid"></div>
+            <div class="scanner-laser"></div>
+
+            <div class="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl text-[11px] font-bold text-slate-800 shadow-sm border border-slate-200">
+              Camera Input: Hand 1 (AI Vision)
+            </div>
+
+            <div class="absolute bottom-3 inset-x-3 bg-white/95 backdrop-blur-md p-2.5 rounded-xl border border-slate-200 flex items-center justify-between shadow-sm">
+              <span class="text-xs font-bold text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                Tracking: <strong id="demoSignLabel" class="text-indigo-600">Hello / Welcome</strong>
+              </span>
+              <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-200">98% Match</span>
+            </div>
+          </div>
+
+          <!-- Right: Interactive Translation Stream & Audio -->
+          <div class="flex flex-col justify-between p-4 rounded-2xl bg-slate-50/80 border border-slate-200">
+            <div>
+              <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">AI Speech Output</span>
+                <span class="text-xs text-indigo-600 font-bold">Text-to-Speech Ready</span>
+              </div>
+
+              <!-- Translated Speech Bubble -->
+              <div class="p-4 rounded-2xl bg-white border border-slate-200 shadow-xs mb-4">
+                <p class="text-[11px] text-slate-400 font-bold uppercase mb-1">Live Translated Sentence:</p>
+                <h3 id="demoSpeechOutput" class="text-xl font-black text-slate-900 tracking-tight">
+                  "Hello! Welcome to ARTH."
+                </h3>
+              </div>
+
+              <!-- Interactive Gesture Trigger Chips -->
+              <span class="text-xs font-bold text-slate-700 block mb-2">Try Clicking a Hand Sign:</span>
+              <div class="flex flex-wrap gap-2 mb-4">
+                <button onclick="simulateLandingSign('Hello / Welcome', 'Hello! Welcome to ARTH.')" class="px-3 py-1.5 rounded-xl bg-indigo-600 text-white text-xs font-bold shadow-xs hover:bg-indigo-700 transition">
+                  👋 Hello
+                </button>
+                <button onclick="simulateLandingSign('Thank You', 'Thank you so much for your assistance.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                  🙏 Thank You
+                </button>
+                <button onclick="simulateLandingSign('Help', 'I need immediate medical help.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                  🆘 Help
+                </button>
+                <button onclick="simulateLandingSign('Water', 'Could you please give me drinking water?')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                  💧 Water
+                </button>
+                <button onclick="simulateLandingSign('I Love You', 'I love you my dear friend.')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 text-xs font-bold hover:bg-indigo-50 hover:text-indigo-700 transition">
+                  🤟 I Love You
+                </button>
+              </div>
+            </div>
+
+            <!-- Speak Aloud Button -->
+            <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
+              <button id="btnDemoSpeak" onclick="speakDemoText()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center gap-2 shadow-xs transition">
+                <svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                <span>Listen Aloud (TTS Voice)</span>
+              </button>
+              <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="text-xs font-extrabold text-indigo-600 hover:text-indigo-800 cursor-pointer">Launch Full Webcam Translator ➔</a>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+
+  <!-- ================= METRICS & STATS BANNER ================= -->
+  <section class="py-12 border-y border-slate-200 bg-white">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+      <div class="p-4 rounded-2xl bg-indigo-50/40 border border-indigo-100">
+        <div class="text-2xl mb-1">🎯</div>
+        <h3 class="text-3xl sm:text-4xl font-black text-indigo-600 mb-0.5">98.4%</h3>
+        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Landmark Accuracy</p>
+        <span class="text-[11px] text-slate-500 font-medium">Real-time finger precision</span>
+      </div>
+      <div class="p-4 rounded-2xl bg-sky-50/40 border border-sky-100">
+        <div class="text-2xl mb-1">⚡</div>
+        <h3 class="text-3xl sm:text-4xl font-black text-sky-600 mb-0.5">14 ms</h3>
+        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Real-Time Latency</p>
+        <span class="text-[11px] text-slate-500 font-medium">Instant on-device execution</span>
+      </div>
+      <div class="p-4 rounded-2xl bg-purple-50/40 border border-purple-100">
+        <div class="text-2xl mb-1">📖</div>
+        <h3 class="text-3xl sm:text-4xl font-black text-purple-600 mb-0.5">500+</h3>
+        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Signs & A-Z Alphabet</p>
+        <span class="text-[11px] text-slate-500 font-medium">Both ASL and ISL dialects</span>
+      </div>
+      <div class="p-4 rounded-2xl bg-emerald-50/40 border border-emerald-100">
+        <div class="text-2xl mb-1">🛡️</div>
+        <h3 class="text-3xl sm:text-4xl font-black text-emerald-600 mb-0.5">100%</h3>
+        <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">Client-Side Privacy</p>
+        <span class="text-[11px] text-slate-500 font-medium">Zero video ever saved or uploaded</span>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= THE STAR SECTION: INTERACTIVE LEFT-SIDE FEATURE SHOWCASE ================= -->
+  <section id="features" class="py-20 px-4 lg:px-8 max-w-7xl mx-auto w-full">
+    
+    <!-- Section Header -->
+    <div class="text-center max-w-3xl mx-auto mb-14">
+      <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1 rounded-full border border-indigo-200">
+        Engineered for Complete Independence
+      </span>
+      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mt-3 mb-4">
+        Explore Every Feature on the Left
+      </h2>
+      <p class="text-sm sm:text-base text-slate-600 font-medium">
+        Tap any feature on the left to see live interactive demonstrations, AI architecture, and step-by-step usage.
+      </p>
+    </div>
+
+    <!-- 2-Column Split: Left Side Features Rail + Right Side Rich Detail Panel -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      
+      <!-- ================= LEFT RAIL: FEATURE LIST (LARGER ICONS & TEXT) ================= -->
+      <div class="lg:col-span-5 flex flex-col gap-3.5">
+        <div class="flex items-center justify-between px-2 pb-2 border-b border-slate-200">
+          <span class="text-xs font-extrabold uppercase tracking-wider text-slate-400">Select a Feature Below</span>
+          <span class="text-[11px] font-bold text-indigo-600 bg-indigo-50 px-2.5 py-0.5 rounded-full border border-indigo-200">6 Core Tools</span>
+        </div>
+
+        <!-- 1. Camera Sign to Speech -->
+        <button id="featBtn-camera" onclick="selectShowcaseFeature('camera')" class="w-full p-4 rounded-2xl bg-white border-2 border-indigo-500 ring-2 ring-indigo-100 shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl font-bold border border-indigo-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              📷
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-indigo-600 transition">Camera Sign ➔ Voice</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Vision AI</span>
+                <span class="text-xs text-slate-500 font-medium">21-Joint Real-time AI Speech</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-indigo-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+        <!-- 2. Voice to Sign Visualizer -->
+        <button id="featBtn-voice" onclick="selectShowcaseFeature('voice')" class="w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 hover:shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-3xl font-bold border border-sky-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              🗣️
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-sky-600 transition">Voice ➔ Sign Avatar</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">Voice-to-Sign</span>
+                <span class="text-xs text-slate-500 font-medium">Dynamic Motion & Slow-Mo</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-slate-300 group-hover:text-sky-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+        <!-- 3. Two-Way Dialogue Bridge -->
+        <button id="featBtn-chat" onclick="selectShowcaseFeature('chat')" class="w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-3xl font-bold border border-emerald-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              💬
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-emerald-600 transition">Two-Way Dialogue</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">Dual Channel</span>
+                <span class="text-xs text-slate-500 font-medium">Hearing ⇄ Deaf Split Chat</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-slate-300 group-hover:text-emerald-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+        <!-- 4. Practice Arena (Shiksha) -->
+        <button id="featBtn-practice" onclick="selectShowcaseFeature('practice')" class="w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-3xl font-bold border border-amber-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              🎯
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-amber-600 transition">Practice Arena</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">ARTH Shiksha</span>
+                <span class="text-xs text-slate-500 font-medium">AI Scoring & Guides</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-slate-300 group-hover:text-amber-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+        <!-- 5. Emergency SOS Deck -->
+        <button id="featBtn-sos" onclick="selectShowcaseFeature('sos')" class="w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-rose-400 hover:shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-rose-50 text-rose-600 flex items-center justify-center text-3xl font-bold border border-rose-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              🚨
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-rose-600 transition">Emergency SOS Deck</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">Life Safety</span>
+                <span class="text-xs text-slate-500 font-medium">1-Tap Broadcast & Audio</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-slate-300 group-hover:text-rose-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+        <!-- 6. Sign Dictionary & A-Z -->
+        <button id="featBtn-dict" onclick="selectShowcaseFeature('dict')" class="w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-purple-400 hover:shadow-md transition-all text-left flex items-center justify-between group">
+          <div class="flex items-center gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center text-3xl font-bold border border-purple-100 shadow-xs flex-shrink-0 group-hover:scale-105 transition-transform">
+              📖
+            </div>
+            <div>
+              <h4 class="text-base sm:text-lg font-black text-slate-900 group-hover:text-purple-600 transition">Sign Dictionary & A-Z</h4>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">500+ Words</span>
+                <span class="text-xs text-slate-500 font-medium">Full ASL/ISL Library</span>
+              </div>
+            </div>
+          </div>
+          <span class="text-slate-300 group-hover:text-purple-600 font-black text-lg group-hover:translate-x-1 transition-transform">➔</span>
+        </button>
+
+      </div>
+
+
+      <!-- ================= RIGHT PANEL: DYNAMIC RICH DETAIL CARD ================= -->
+      <div class="lg:col-span-7 sticky top-24">
+        
+        <div class="arth-card p-6 sm:p-8 bg-white border border-slate-200 shadow-xl rounded-3xl flex flex-col gap-6">
+          
+          <!-- Header Area -->
+          <div class="flex items-center justify-between border-b border-slate-100 pb-5">
+            <div class="flex items-center gap-4">
+              <div id="showcaseIconBox" class="w-16 h-16 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-4xl font-bold border border-indigo-100 shadow-sm flex-shrink-0">
+                📷
+              </div>
+              <div>
+                <span id="showcaseCategoryBadge" class="text-xs font-bold px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                  Vision AI & Speech
+                </span>
+                <h3 id="showcaseTitle" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1.5 tracking-tight">
+                  Real-Time Camera Sign-to-Speech
+                </h3>
+              </div>
+            </div>
+
+            <button onclick="openFeatureDrawer(currentSelectedFeature || 'camera')" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-600 text-xs font-bold transition">
+              <span>Full Drawer View</span>
+              <span class="text-indigo-600">↗</span>
+            </button>
+          </div>
+
+          <!-- Interactive Highlight Card for Active Feature -->
+          <div id="showcaseVisualCard" class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 border border-indigo-100 shadow-xs">
+            <!-- Dynamic Preview Content Injected Here -->
+          </div>
+
+          <!-- Deep Overview -->
+          <div>
+            <h4 class="font-extrabold text-slate-900 text-base mb-2 flex items-center gap-2">
+              <span>📌</span> Detailed Overview & Purpose
+            </h4>
+            <p id="showcaseOverview" class="text-slate-600 leading-relaxed font-medium text-sm sm:text-base">
+              Position your hands in front of any camera (laptop, phone, or tablet). ARTH's on-device computer vision engine tracks 21 spatial finger landmarks, verifies sign stability over 1 second to eliminate accidental gestures, and sequences words into full sentences that are spoken aloud using natural voice synthesis.
+            </p>
+          </div>
+
+          <!-- Key Capabilities List -->
+          <div>
+            <h4 class="font-extrabold text-slate-900 text-base mb-2.5 flex items-center gap-2">
+              <span>⚡</span> Core Capabilities & AI Tech
+            </h4>
+            <ul id="showcaseCapabilities" class="space-y-2 text-sm sm:text-base">
+              <!-- Injected by JS -->
+            </ul>
+          </div>
+
+          <!-- Step-by-Step Instructions -->
+          <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+            <h4 class="font-extrabold text-slate-900 text-base mb-3 flex items-center gap-2">
+              <span>🛠️</span> How to Use It Step-by-Step
+            </h4>
+            <ol id="showcaseSteps" class="space-y-2.5 text-slate-700 text-sm">
+              <!-- Injected by JS -->
+            </ol>
+          </div>
+
+          <!-- Technical Specs Grid -->
+          <div>
+            <h4 class="font-extrabold text-slate-900 text-base mb-2.5 flex items-center gap-2">
+              <span>📊</span> Technical Specifications & Architecture
+            </h4>
+            <div id="showcaseSpecs" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <!-- Injected by JS -->
+            </div>
+          </div>
+
+          <!-- Footer Action Button -->
+          <div class="pt-4 border-t border-slate-100 flex items-center gap-4">
+            <a id="showcaseLaunchBtn" href="translator.html?tab=camera-translate" onclick="event.preventDefault(); openAppGuarded(this.getAttribute('data-href') || this.href);" class="flex-1 py-4 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-indigo-200 transition text-center flex items-center justify-center gap-2 cursor-pointer">
+              <span>Launch This Feature in ARTH App</span>
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how-it-works" class="py-20 px-4 lg:px-8 bg-slate-100/60 border-y border-slate-200">
+    <div class="max-w-6xl mx-auto">
+      
+      <div class="text-center max-w-2xl mx-auto mb-16">
+        <h2 class="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight mb-3">
+          How ARTH Works in 3 Simple Steps
+        </h2>
+        <p class="text-sm text-slate-600 font-medium">
+          Zero downloads, zero complicated setup. Works right inside any standard modern web browser.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Step 1 -->
+        <div class="arth-card p-7 bg-white border border-slate-200 relative rounded-3xl shadow-sm">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-base flex items-center justify-center mb-5">01</span>
+          <h3 class="text-lg font-extrabold text-slate-900 mb-2">Open Camera or Speak</h3>
+          <p class="text-sm text-slate-600 leading-relaxed font-medium">
+            Position your hands in front of your device webcam, or click the microphone button to speak English phrases normally.
+          </p>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="arth-card p-7 bg-white border border-slate-200 relative rounded-3xl shadow-sm">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-base flex items-center justify-center mb-5">02</span>
+          <h3 class="text-lg font-extrabold text-slate-900 mb-2">21-Joint Neural Tracking</h3>
+          <p class="text-sm text-slate-600 leading-relaxed font-medium">
+            ARTH’s computer vision model extracts spatial coordinates of every finger joint in 14 milliseconds with 98.4% landmark accuracy.
+          </p>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="arth-card p-7 bg-white border border-slate-200 relative rounded-3xl shadow-sm">
+          <span class="w-10 h-10 rounded-2xl bg-indigo-50 border border-indigo-200 text-indigo-700 font-extrabold text-base flex items-center justify-center mb-5">03</span>
+          <h3 class="text-lg font-extrabold text-slate-900 mb-2">Instant Voice & Visual Output</h3>
+          <p class="text-sm text-slate-600 leading-relaxed font-medium">
+            Signs are assembled into cohesive sentences and spoken aloud via speech synthesis, or speech is rendered as an animated sign sequence.
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================= REAL-WORLD IMPACT ================= -->
+  <section id="impact" class="py-20 px-4 lg:px-8 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      
+      <div>
+        <span class="text-xs font-extrabold uppercase tracking-widest text-indigo-600 bg-indigo-50 px-3.5 py-1 rounded-full border border-indigo-200">
+          Real-World Impact
+        </span>
+        <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mt-3 mb-5 leading-tight">
+          Empowering Millions Across Public Spaces & Healthcare
+        </h2>
+        <p class="text-sm sm:text-base text-slate-600 leading-relaxed mb-6 font-medium">
+          Over 70 million deaf individuals worldwide face daily barriers in medical centers, government offices, and transit hubs. ARTH provides an instantaneous communication bridge that restores independence and dignity.
+        </p>
+
+        <div class="space-y-4 text-xs sm:text-sm font-semibold text-slate-700">
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+            <span class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl flex-shrink-0">🏥</span>
+            <span>Emergency Rooms & Clinics: Instant patient symptom and diagnosis communication</span>
+          </div>
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+            <span class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl flex-shrink-0">🏫</span>
+            <span>Classrooms & Universities: Seamless interaction between students & hearing educators</span>
+          </div>
+          <div class="flex items-center gap-3.5 p-3.5 rounded-2xl bg-white border border-slate-200 shadow-xs">
+            <span class="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center text-xl flex-shrink-0">✈️</span>
+            <span>Airports & Transit Stations: Navigation and urgent assistance during transit delays</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Testimonial Quote Card -->
+      <div class="arth-card p-8 sm:p-10 bg-gradient-to-br from-indigo-50/60 via-white to-sky-50/40 border border-indigo-100 shadow-xl rounded-3xl">
+        <div class="text-indigo-600 text-5xl font-serif mb-4">“</div>
+        <p class="text-lg sm:text-xl font-bold text-slate-800 leading-relaxed mb-8">
+          "ARTH eliminated the anxiety I used to feel when visiting a clinic alone. Being able to sign into my phone camera and have it speak my words clearly gave me back my voice."
+        </p>
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-full bg-indigo-600 text-white font-bold flex items-center justify-center text-base shadow-sm">
+            AD
+          </div>
+          <div>
+            <h4 class="font-extrabold text-slate-900 text-base">Ananya D.</h4>
+            <p class="text-xs text-slate-500 font-medium">Deaf Community Advocate & Teacher</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================= FREQUENTLY ASKED QUESTIONS ================= -->
+  <section id="faq" class="py-20 px-4 lg:px-8 bg-slate-100/50 border-t border-slate-200">
+    <div class="max-w-4xl mx-auto">
+      
+      <div class="text-center mb-12">
+        <h2 class="text-3xl font-black text-slate-900 tracking-tight mb-2">Frequently Asked Questions</h2>
+        <p class="text-sm text-slate-500 font-medium">Clear answers about ARTH's privacy, models, and usage.</p>
+      </div>
+
+      <div class="space-y-4">
+        
+        <details class="arth-card p-5 bg-white border border-slate-200 rounded-2xl group cursor-pointer shadow-xs">
+          <summary class="font-extrabold text-slate-900 text-sm sm:text-base flex items-center justify-between list-none">
+            <span>Is my camera video recorded or sent to a cloud server?</span>
+            <span class="text-indigo-600 font-bold transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="text-sm text-slate-600 mt-3 leading-relaxed font-medium">
+            No. ARTH is engineered with 100% on-device client-side execution. Camera video streams never leave your browser or get stored on any remote server, ensuring complete confidentiality.
+          </p>
+        </details>
+
+        <details class="arth-card p-5 bg-white border border-slate-200 rounded-2xl group cursor-pointer shadow-xs">
+          <summary class="font-extrabold text-slate-900 text-sm sm:text-base flex items-center justify-between list-none">
+            <span>Which sign language dialects does ARTH support?</span>
+            <span class="text-indigo-600 font-bold transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="text-sm text-slate-600 mt-3 leading-relaxed font-medium">
+            ARTH currently supports American Sign Language (ASL) and Indian Sign Language (ISL), along with universal signs and full A-Z fingerspelling. You can toggle between dialects with one click.
+          </p>
+        </details>
+
+        <details class="arth-card p-5 bg-white border border-slate-200 rounded-2xl group cursor-pointer shadow-xs">
+          <summary class="font-extrabold text-slate-900 text-sm sm:text-base flex items-center justify-between list-none">
+            <span>Can I use ARTH without an active webcam?</span>
+            <span class="text-indigo-600 font-bold transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="text-sm text-slate-600 mt-3 leading-relaxed font-medium">
+            Yes! ARTH features an Interactive Vision Simulation mode with one-click test gestures, full Voice-to-Sign translation, Emergency SOS flashcards, and a searchable Dictionary.
+          </p>
+        </details>
+
+        <details class="arth-card p-5 bg-white border border-slate-200 rounded-2xl group cursor-pointer shadow-xs">
+          <summary class="font-extrabold text-slate-900 text-sm sm:text-base flex items-center justify-between list-none">
+            <span>Is ARTH free to use?</span>
+            <span class="text-indigo-600 font-bold transition-transform group-open:rotate-180">▼</span>
+          </summary>
+          <p class="text-sm text-slate-600 mt-3 leading-relaxed font-medium">
+            Yes, ARTH is completely free, open, and dedicated to the global Deaf & Hard-of-Hearing community.
+          </p>
+        </details>
+
+      </div>
+
+    </div>
+  </section>
+
+
+  <!-- ================= FINAL CALL TO ACTION ================= -->
+  <section class="py-20 px-4 text-center bg-white border-t border-slate-200">
+    <div class="max-w-3xl mx-auto flex flex-col items-center">
+      <h2 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
+        Ready to Experience ARTH?
+      </h2>
+      <p class="text-sm sm:text-base text-slate-600 mb-8 max-w-xl font-medium">
+        Launch the live translator directly in your browser or create your free profile to track your learning streak.
+      </p>
+      <div class="flex flex-col sm:flex-row items-center gap-3.5">
+        <a href="translator.html" onclick="event.preventDefault(); openAppGuarded('translator.html');" class="px-8 py-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-xl shadow-indigo-200 transition cursor-pointer">
+          Launch Live App Now ➔
+        </a>
+        <button onclick="openAuthModal('signup')" class="px-7 py-4 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm shadow-xs transition">
+          Create Free Profile
+        </button>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ================= FOOTER ================= -->
+  <footer class="py-12 px-4 lg:px-8 bg-slate-50 border-t border-slate-200 mt-auto text-slate-500 text-xs">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
+      
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-sm">
+          A
+        </div>
+        <div>
+          <span class="font-extrabold text-slate-800 text-sm block">ARTH (अर्थ)</span>
+          <span class="text-slate-400">AI Assistive Communication & Voice Bridge Platform</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-6 font-semibold">
+        <a href="translator.html?tab=camera-translate" onclick="event.preventDefault(); openAppGuarded(this.href);" class="hover:text-indigo-600 transition cursor-pointer">Camera Sign</a>
+        <a href="translator.html?tab=reverse-translate" onclick="event.preventDefault(); openAppGuarded(this.href);" class="hover:text-indigo-600 transition cursor-pointer">Voice to Sign</a>
+        <a href="translator.html?tab=sos" onclick="event.preventDefault(); openAppGuarded(this.href);" class="hover:text-indigo-600 transition cursor-pointer">Emergency SOS</a>
+        <a href="translator.html?tab=dictionary" onclick="event.preventDefault(); openAppGuarded(this.href);" class="hover:text-indigo-600 transition cursor-pointer">Dictionary</a>
+        <a href="#faq" class="hover:text-indigo-600 transition">Privacy Policy</a>
+      </div>
+
+      <div class="text-center md:text-right">
+        <p>© 2026 ARTH Project. 100% Free & Open-Access.</p>
+        <p class="text-slate-400 text-[11px] mt-0.5">Empowering independence through On-Device Vision AI.</p>
+      </div>
+
+    </div>
+  </footer>
+
+
+  <!-- ================= AUTH MODAL (SIGN IN / SIGN UP) ================= -->
+  <div id="authModal" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="arth-card w-full max-w-md p-6 sm:p-8 bg-white border border-slate-200 shadow-2xl rounded-3xl relative">
+      
+      <!-- Close Button -->
+      <button onclick="closeAuthModal()" class="absolute top-4 right-4 p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition">
+        <svg width="20" height="20" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+
+      <!-- Modal Header -->
+      <div class="text-center mb-6">
+        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center mx-auto mb-3 font-bold text-xl border border-indigo-100 shadow-xs">
+          👋
+        </div>
+        <h3 id="authModalTitle" class="text-2xl font-black text-slate-900 tracking-tight">Welcome Back to ARTH</h3>
+        <p id="authModalSubtitle" class="text-xs text-slate-500 font-medium mt-1">Sign in to access your saved notes and live bridge</p>
+      </div>
+
+      <!-- Access Restriction Notice Banner -->
+      <div id="authNoticeBox" class="hidden mb-4 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold flex items-start gap-2.5 shadow-xs">
+        <span class="text-base flex-shrink-0 mt-0.5">🔒</span>
+        <span id="authNoticeText">Please sign in or create a free account to access the ARTH Translator.</span>
+      </div>
+
+      <!-- Tab Switcher: Sign In vs Sign Up -->
+      <div class="flex p-1 rounded-xl bg-slate-100 border border-slate-200 mb-5 text-xs font-bold">
+        <button id="tabBtnSignIn" onclick="switchAuthTab('signin')" class="flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition">
+          Sign In
+        </button>
+        <button id="tabBtnSignUp" onclick="switchAuthTab('signup')" class="flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition">
+          Sign Up Free
+        </button>
+      </div>
+
+      <!-- Form Inputs -->
+      <form onsubmit="handleAuthSubmit(event)" class="space-y-3.5 text-xs font-semibold">
+        
+        <!-- Full Name (Only on Sign Up) -->
+        <div id="fieldFullName" class="hidden space-y-1">
+          <label class="block text-slate-700 font-bold">Full Name</label>
+          <input type="text" id="authName" placeholder="Dr. Sarah Jenkins" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800">
+        </div>
+
+        <!-- Role Select (Only on Sign Up) -->
+        <div id="fieldRole" class="hidden space-y-1">
+          <label class="block text-slate-700 font-bold">I am primarily using ARTH as:</label>
+          <select id="authRole" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800 bg-white">
+            <option value="deaf">Deaf or Hard-of-Hearing Individual</option>
+            <option value="hearing">Hearing Family Member / Friend</option>
+            <option value="healthcare">Doctor / Healthcare Professional</option>
+            <option value="educator">Sign Language Student / Educator</option>
+          </select>
+        </div>
+
+        <!-- Email -->
+        <div class="space-y-1">
+          <label class="block text-slate-700 font-bold">Email Address</label>
+          <input type="email" id="authEmail" required placeholder="user@example.com" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800">
+        </div>
+
+        <!-- Password -->
+        <div class="space-y-1">
+          <label class="block text-slate-700 font-bold">Password</label>
+          <input type="password" id="authPassword" required placeholder="••••••••" class="w-full p-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 outline-none text-slate-800">
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="btnAuthSubmit" class="w-full py-3.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-md shadow-indigo-200 transition mt-2">
+          Sign In to ARTH
+        </button>
+
+        <!-- Demo Account Shortcut -->
+        <div class="mt-3 p-2.5 rounded-xl bg-indigo-50/80 border border-indigo-200 text-slate-700 text-[11px] flex items-center justify-between">
+          <span><strong>Demo Account:</strong> demo@arth.ai / password123</span>
+          <button type="button" onclick="fillDemoCredentials()" class="underline font-bold text-indigo-700 hover:text-indigo-900 ml-2">Auto-Fill</button>
+        </div>
+
+      </form>
+
+      <!-- Social Login Separator -->
+      <div class="relative my-4 text-center">
+        <span class="absolute inset-x-0 top-1/2 -translate-y-1/2 h-px bg-slate-200"></span>
+        <span class="relative bg-white px-3 text-[11px] font-bold text-slate-400 uppercase tracking-wider">or continue with</span>
+      </div>
+
+      <!-- Social Buttons -->
+      <div class="grid grid-cols-2 gap-2.5">
+        <button onclick="handleSocialLogin('Google')" class="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+          <svg width="16" height="16" class="w-4 h-4" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+          <span>Google</span>
+        </button>
+        <button onclick="handleSocialLogin('Apple')" class="py-2.5 px-3 rounded-xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition">
+          <svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.84c.65-.82 1.1-1.96.98-3.1-.95.04-2.1.64-2.77 1.43-.59.68-1.11 1.83-.97 2.95 1.07.08 2.12-.54 2.76-1.28z"/></svg>
+          <span>Apple</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- ================= SLIDE-OVER FEATURE DETAIL DRAWER (LEFT SIDE) ================= -->
+  <div id="featureDrawerBackdrop" onclick="closeFeatureDrawer()" class="hidden fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-xs transition-opacity duration-300"></div>
+
+  <aside id="featureDetailDrawer" class="fixed inset-y-0 left-0 z-50 w-full max-w-xl feature-drawer-left transform -translate-x-full transition-transform duration-300 flex flex-col bg-white border-r border-slate-200 shadow-2xl">
+    
+    <!-- Drawer Sticky Header -->
+    <div class="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-white sticky top-0 z-10">
+      <div class="flex items-center gap-3.5">
+        <div id="drawerIconBox" class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-3xl font-bold border border-indigo-100 shadow-sm flex-shrink-0">
+          📷
+        </div>
+        <div>
+          <span id="drawerCategoryBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+            Vision AI & Speech
+          </span>
+          <h3 id="drawerTitle" class="text-xl sm:text-2xl font-black text-slate-900 mt-1 tracking-tight">
+            Real-Time Camera Sign-to-Speech
+          </h3>
+        </div>
+      </div>
+      <button onclick="closeFeatureDrawer()" class="p-2.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition" title="Close drawer">
+        <svg width="22" height="22" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M6 18L18 6M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <!-- Drawer Scrollable Body -->
+    <div class="flex-1 overflow-y-auto p-6 sm:p-7 space-y-6 text-slate-700 text-sm">
+      
+      <!-- Visual Highlight Card -->
+      <div id="drawerVisualCard" class="p-5 rounded-2xl bg-gradient-to-br from-indigo-50/70 via-white to-sky-50/50 border border-indigo-100 shadow-xs">
+      </div>
+
+      <!-- Detailed Overview -->
+      <div>
+        <h4 class="font-extrabold text-slate-900 text-base mb-2 flex items-center gap-2">
+          <span>📌</span> Detailed Overview & Purpose
+        </h4>
+        <p id="drawerOverview" class="text-slate-600 leading-relaxed font-medium text-sm sm:text-base">
+        </p>
+      </div>
+
+      <!-- Key Capabilities List -->
+      <div>
+        <h4 class="font-extrabold text-slate-900 text-base mb-2.5 flex items-center gap-2">
+          <span>⚡</span> Core Capabilities & AI Tech
+        </h4>
+        <ul id="drawerCapabilities" class="space-y-2.5 text-sm sm:text-base">
+        </ul>
+      </div>
+
+      <!-- Step-by-Step Usage -->
+      <div class="p-5 rounded-2xl bg-slate-50 border border-slate-200">
+        <h4 class="font-extrabold text-slate-900 text-base mb-3 flex items-center gap-2">
+          <span>🛠️</span> How to Use It Step-by-Step
+        </h4>
+        <ol id="drawerSteps" class="space-y-2.5 text-slate-700 text-sm">
+        </ol>
+      </div>
+
+      <!-- Real-World Scenarios -->
+      <div>
+        <h4 class="font-extrabold text-slate-900 text-base mb-2 flex items-center gap-2">
+          <span>🏥</span> Real-World Scenarios & Impact
+        </h4>
+        <p id="drawerScenarios" class="text-slate-600 leading-relaxed font-medium text-sm">
+        </p>
+      </div>
+
+      <!-- Technical Specifications Grid -->
+      <div>
+        <h4 class="font-extrabold text-slate-900 text-base mb-2.5 flex items-center gap-2">
+          <span>📊</span> Specifications & Architecture
+        </h4>
+        <div id="drawerSpecs" class="grid grid-cols-2 gap-3">
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Drawer Sticky Footer Action Button -->
+    <div class="p-4 sm:p-5 border-t border-slate-100 bg-white sticky bottom-0 z-10 flex items-center gap-3">
+      <a id="drawerLaunchBtn" href="translator.html" onclick="event.preventDefault(); openAppGuarded(this.getAttribute('data-href') || this.href);" class="flex-1 py-3.5 px-6 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-sm shadow-lg shadow-indigo-200 transition text-center flex items-center justify-center gap-2 cursor-pointer">
+        <span>Launch This Feature in App</span>
+        <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+      </a>
+      <button onclick="closeFeatureDrawer()" class="py-3.5 px-5 rounded-2xl border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-sm transition">
+        Close
+      </button>
+    </div>
+
+  </aside>
+
+
+  <!-- ================= CLIENT JAVASCRIPT ================= -->
+  <script>
+    // Auth Modal Controller
+    let currentAuthMode = 'signin';
+
+    function openAuthModal(mode = 'signin', customNotice = null) {
+      currentAuthMode = mode;
+      switchAuthTab(mode);
+      const noticeBox = document.getElementById('authNoticeBox');
+      const noticeText = document.getElementById('authNoticeText');
+      if (customNotice && noticeBox && noticeText) {
+        noticeText.textContent = customNotice;
+        noticeBox.classList.remove('hidden');
+      } else if (noticeBox) {
+        noticeBox.classList.add('hidden');
+      }
+      document.getElementById('authModal').classList.remove('hidden');
+    }
+
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.add('hidden');
+    }
+
+    // Strict Guard: Prevent opening translator app without signing in
+    function openAppGuarded(targetUrl = 'translator.html') {
+      const token = localStorage.getItem('arth_jwt_token');
+      const user = localStorage.getItem('arth_user_profile');
+      if (token && user) {
+        window.location.href = targetUrl;
+      } else {
+        try {
+          sessionStorage.setItem('arth_auth_redirect', targetUrl);
+        } catch (e) {}
+        openAuthModal('signin', '🔒 Access Restricted: Please sign in or create a free account to launch the ARTH Translator.');
+      }
+    }
+
+    function switchAuthTab(mode) {
+      currentAuthMode = mode;
+      const tabIn = document.getElementById('tabBtnSignIn');
+      const tabUp = document.getElementById('tabBtnSignUp');
+      const fieldName = document.getElementById('fieldFullName');
+      const fieldRole = document.getElementById('fieldRole');
+      const submitBtn = document.getElementById('btnAuthSubmit');
+      const title = document.getElementById('authModalTitle');
+      const subtitle = document.getElementById('authModalSubtitle');
+
+      if (mode === 'signup') {
+        tabUp.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition';
+        tabIn.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        fieldName.classList.remove('hidden');
+        fieldRole.classList.remove('hidden');
+        submitBtn.textContent = 'Create Free Account & Launch';
+        title.textContent = 'Join ARTH Today';
+        subtitle.textContent = 'Create your account to save translations & practice streaks';
+      } else {
+        tabIn.className = 'flex-1 py-2 rounded-lg bg-white text-indigo-600 shadow-xs transition';
+        tabUp.className = 'flex-1 py-2 rounded-lg text-slate-600 hover:text-slate-900 transition';
+        fieldName.classList.add('hidden');
+        fieldRole.classList.add('hidden');
+        submitBtn.textContent = 'Sign In to ARTH';
+        title.textContent = 'Welcome Back to ARTH';
+        subtitle.textContent = 'Sign in to access your saved notes and live bridge';
+      }
+    }
+
+    function fillDemoCredentials() {
+      switchAuthTab('signin');
+      document.getElementById('authEmail').value = 'demo@arth.ai';
+      document.getElementById('authPassword').value = 'password123';
+    }
+
+    async function handleAuthSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btnAuthSubmit');
+      const originalText = btn.textContent;
+      btn.innerHTML = `<span class="animate-spin inline-block mr-2">⟳</span> Connecting to Database...`;
+
+      const email = document.getElementById('authEmail').value.trim();
+      const password = document.getElementById('authPassword').value;
+
+      try {
+        if (currentAuthMode === 'signup') {
+          const fullName = document.getElementById('authName').value.trim() || 'New User';
+          const role = document.getElementById('authRole').value || 'deaf';
+          await ArthAPI.register(email, password, fullName, role);
+        } else {
+          await ArthAPI.login(email, password);
+        }
+        btn.innerHTML = `✓ Authenticated! Opening App...`;
+        const redirectTarget = sessionStorage.getItem('arth_auth_redirect') || 'translator.html';
+        try { sessionStorage.removeItem('arth_auth_redirect'); } catch(e) {}
+        setTimeout(() => {
+          closeAuthModal();
+          window.location.href = redirectTarget;
+        }, 350);
+      } catch (err) {
+        alert(err.message || "Authentication failed. Please verify your credentials.");
+        btn.textContent = originalText;
+      }
+    }
+
+    function handleSocialLogin(provider) {
+      alert(`Connecting securely with ${provider}... Please use standard email or demo account.`);
+    }
+
+    // Landing Page Hero Interactive Demo Simulator
+    let currentDemoSign = "Hello / Welcome";
+    let currentDemoSpeech = "Hello! Welcome to ARTH.";
+
+    function simulateLandingSign(sign, speech) {
+      currentDemoSign = sign;
+      currentDemoSpeech = speech;
+      document.getElementById('demoSignLabel').textContent = sign;
+      document.getElementById('demoSpeechOutput').textContent = `"${speech}"`;
+      speakDemoText();
+    }
+
+    function speakDemoText() {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(currentDemoSpeech);
+        u.rate = 1.0;
+        window.speechSynthesis.speak(u);
+      }
+    }
+
+    // Canvas Hand Skeleton Animation for Landing Demo (100% Light Theme)
+    const canvas = document.getElementById('landingCanvas');
+    if (canvas) {
+      const ctx = canvas.getContext('2d');
+      const connections = [
+        [0,1],[1,2],[2,3],[3,4],
+        [0,5],[5,6],[6,7],[7,8],
+        [9,10],[10,11],[11,12],
+        [13,14],[14,15],[15,16],
+        [0,17],[17,18],[18,19],[19,20],
+        [5,9],[9,13],[13,17]
+      ];
+
+      function renderLandingSkeleton(t) {
+        const rect = canvas.getBoundingClientRect();
+        if (canvas.width !== rect.width || canvas.height !== rect.height) {
+          canvas.width = rect.width;
+          canvas.height = rect.height;
+        }
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        const w = canvas.width;
+        const h = canvas.height;
+        const time = t * 0.002;
+
+        const ox = w * 0.5 + Math.sin(time) * 10;
+        const oy = h * 0.52 + Math.cos(time * 0.8) * 8;
+        const s = Math.min(w, h) * 0.65;
+
+        // Base points
+        const base = [
+          {x: 0.50, y: 0.85},
+          {x: 0.42, y: 0.75}, {x: 0.35, y: 0.66}, {x: 0.30, y: 0.58}, {x: 0.24, y: 0.50},
+          {x: 0.46, y: 0.64}, {x: 0.44, y: 0.48}, {x: 0.43, y: 0.34}, {x: 0.42, y: 0.20},
+          {x: 0.50, y: 0.63}, {x: 0.50, y: 0.46}, {x: 0.50, y: 0.31}, {x: 0.50, y: 0.17},
+          {x: 0.54, y: 0.64}, {x: 0.56, y: 0.48}, {x: 0.57, y: 0.34}, {x: 0.58, y: 0.21},
+          {x: 0.58, y: 0.68}, {x: 0.62, y: 0.55}, {x: 0.65, y: 0.43}, {x: 0.68, y: 0.30}
+        ];
+
+        const pts = base.map(p => ({
+          x: ox + (p.x - 0.5) * s,
+          y: oy + (p.y - 0.5) * s
+        }));
+
+        // Bones (Vibrant Indigo with subtle shadow)
+        ctx.lineWidth = 3.5;
+        ctx.lineCap = 'round';
+        connections.forEach(([a, b]) => {
+          const p1 = pts[a];
+          const p2 = pts[b];
+          if (p1 && p2) {
+            ctx.strokeStyle = '#4F46E5';
+            ctx.beginPath();
+            ctx.moveTo(p1.x, p1.y);
+            ctx.lineTo(p2.x, p2.y);
+            ctx.stroke();
+          }
+        });
+
+        // Joints (Vivid Emerald with white core)
+        pts.forEach((p, idx) => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, idx % 4 === 0 ? 6.5 : 4.5, 0, Math.PI * 2);
+          ctx.fillStyle = idx % 4 === 0 ? '#10B981' : '#6366F1';
+          ctx.fill();
+          ctx.strokeStyle = '#FFFFFF';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        });
+
+        requestAnimationFrame(renderLandingSkeleton);
+      }
+
+      requestAnimationFrame(renderLandingSkeleton);
+    }
+
+    // ================= DETAILED FEATURE DATA =================
+    const FEATURE_DATA = {
+      camera: {
+        title: "Real-Time Camera Sign-to-Speech",
+        category: "Vision AI & Speech",
+        icon: "📷",
+        badgeColor: "bg-indigo-50 text-indigo-700 border-indigo-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-indigo-700">● 21-Joint Spatial Landmark Mesh</span>
+            <span class="text-[11px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">14ms Latency</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">Translates continuous hand gestures into natural spoken voice and constructed sentences.</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-indigo-100 shadow-xs">
+            <span>Hand Camera Input ➔</span>
+            <span class="px-2.5 py-1 rounded bg-indigo-100 text-indigo-800">Stability Lock (1s)</span>
+            <span>➔</span>
+            <span class="px-2.5 py-1 rounded bg-emerald-100 text-emerald-800">Spoken Voice 🔊</span>
+          </div>
+        `,
+        overview: "Position your hands in front of any camera (laptop, phone, or tablet). ARTH's on-device computer vision engine tracks 21 spatial finger landmarks, verifies sign stability over 1 second to eliminate accidental gestures, and sequences words into full sentences that are spoken aloud using natural voice synthesis.",
+        capabilities: [
+          "21-Joint 3D MediaPipe landmark tracking (Thumb, Index, Middle, Ring, Pinky & Wrist).",
+          "Hold-to-Lock gesture stability meter prevents flickering and false positives.",
+          "Sentence Sequencer with auto-grammar, word deletion, and clipboard copy.",
+          "Instant Text-To-Speech (TTS) readout with customizable voice rate & pitch.",
+          "100% Client-Side Privacy: Camera feed is analyzed locally and NEVER uploaded to any server."
+        ],
+        steps: [
+          "Tap <strong>Start Camera</strong> in the ARTH Translator.",
+          "Position your hand inside the translucent target guide box.",
+          "Form any sign (e.g. Hello, Thank You, Water). Hold the pose for 1 second until the green stability bar completes.",
+          "Tap <strong>Speak Sentence</strong> to hear your words read aloud to anyone nearby."
+        ],
+        scenarios: "Perfect for ordering at restaurants, speaking with doctors at clinics, communicating at airport customer service, and conversing with hearing colleagues without needing pen and paper.",
+        specs: [
+          { label: "Processing Latency", val: "14ms Real-time" },
+          { label: "Accuracy Rate", val: "98.4% Match" },
+          { label: "Supported Dialects", val: "ASL & ISL Modes" },
+          { label: "Data Security", val: "Zero Cloud Video" }
+        ],
+        tabId: "camera-translate"
+      },
+      voice: {
+        title: "Voice & Text to Sign Visualizer",
+        category: "Reverse Translation",
+        icon: "🗣️",
+        badgeColor: "bg-sky-50 text-sky-700 border-sky-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-sky-700">● Speech Recognition ➔ Dynamic Vector Sign</span>
+            <span class="text-[11px] font-extrabold bg-sky-100 text-sky-800 px-2.5 py-0.5 rounded-full">Slow-Mo (0.5x - 1.5x)</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">Hearing users speak normally into the microphone, and ARTH displays animated sign language demonstrations.</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-sky-100 shadow-xs">
+            <span>Spoken Speech ➔</span>
+            <span class="px-2.5 py-1 rounded bg-sky-100 text-sky-800">Voice-to-Text</span>
+            <span>➔</span>
+            <span class="px-2.5 py-1 rounded bg-indigo-100 text-indigo-800">Animated Sign Posture 🤟</span>
+          </div>
+        `,
+        overview: "Designed for hearing parents, colleagues, and healthcare professionals who need to communicate with a deaf individual. Simply speak into your device's microphone or type any English sentence. ARTH breaks down the sentence into animated hand postures with directional movement vectors and slow-motion playback.",
+        capabilities: [
+          "Continuous live microphone speech-to-text recognition.",
+          "Interactive 2D vector sign visualizer showing hand orientations and motion arrows.",
+          "Timeline player with Step Back, Play, Pause, and Step Forward controls.",
+          "Speed slider (0.5x Slow Motion, 1.0x Normal, 1.5x Fast) for easy comprehension.",
+          "Sequential breakdown ribbon displaying individual word cards with execution tips."
+        ],
+        steps: [
+          "Click the <strong>Microphone icon</strong> and speak naturally in English.",
+          "Watch your speech instantly transcribed into text.",
+          "Tap <strong>Generate Sign Language</strong> to watch the animated sign player step through the gestures.",
+          "Adjust speed to 0.5x if you want to inspect finger placement in slow motion."
+        ],
+        scenarios: "Essential when doctors need to give medical instructions to deaf patients, teachers explaining classroom concepts, or hearing family members conversing at home.",
+        specs: [
+          { label: "Audio Engine", val: "Web Speech API" },
+          { label: "Playback Speeds", val: "0.5x, 1.0x, 1.5x" },
+          { label: "Sign Library", val: "500+ Core Words" },
+          { label: "Fingerspelling", val: "Full A-Z Fallback" }
+        ],
+        tabId: "reverse-translate"
+      },
+      chat: {
+        title: "Two-Way Live Dialogue Bridge",
+        category: "Conversational Bridge",
+        icon: "💬",
+        badgeColor: "bg-emerald-50 text-emerald-700 border-emerald-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-emerald-700">● Dual-Channel Synchronized Conversation</span>
+            <span class="text-[11px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-0.5 rounded-full">Transcript Export</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">A shared live chat screen bridging a hearing participant (voice/text) and a deaf participant (signed gestures).</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-emerald-100 shadow-xs">
+            <span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800">Hearing (Audio)</span>
+            <span>⇄ Real-Time Bridge ⇄</span>
+            <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">Deaf (Gestures)</span>
+          </div>
+        `,
+        overview: "A split-screen conversational interface that allows a hearing person and a deaf person to sit across from each other with a single phone or laptop and have a fluid, uninterrupted conversation. Every message features instant speech readout and sign visualizer shortcuts.",
+        capabilities: [
+          "Synchronized dual channels: Hearing Participant and Deaf Participant.",
+          "Instant 'Read Aloud' button on every message for immediate vocalization.",
+          "One-click 'View Sign' button on any chat message to see its gesture breakdown.",
+          "One-click 'Export Transcript' to download the entire conversation as a clean .txt file.",
+          "Preserves full conversational timestamp history during consultations."
+        ],
+        steps: [
+          "Open the <strong>Conversation</strong> tab in the ARTH app.",
+          "The hearing participant types or speaks into their side of the interface.",
+          "The deaf participant performs signs in the camera, which auto-post to the thread.",
+          "At the end of the session, click <strong>Export Transcript</strong> to save a written record."
+        ],
+        scenarios: "Invaluable for hospital patient intake, police emergency reports, bank mortgage interviews, university counseling, and legal discussions.",
+        specs: [
+          { label: "Channel Mode", val: "Dual Split-Screen" },
+          { label: "Audio Playback", val: "Instant One-Tap" },
+          { label: "Export Format", val: "Clean Text (.TXT)" },
+          { label: "Privacy", val: "Zero Cloud Logs" }
+        ],
+        tabId: "duo-chat"
+      },
+      practice: {
+        title: "ARTH Shiksha (Practice Arena)",
+        category: "Learning & Gamification",
+        icon: "🎯",
+        badgeColor: "bg-amber-50 text-amber-700 border-amber-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-amber-700">● AI Pose Silhouette & Accuracy Scoring</span>
+            <span class="text-[11px] font-extrabold bg-amber-100 text-amber-800 px-2.5 py-0.5 rounded-full">Gamified Arena</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">Practice signs with a translucent guide overlay on your camera and receive real-time feedback on your technique.</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-amber-100 shadow-xs">
+            <span>Accuracy Meter:</span>
+            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-extrabold">95% Match</span>
+            <span>• Angle Correct • Finger Curvature Perfect</span>
+          </div>
+        `,
+        overview: "An interactive learning arena created for both deaf children learning foundational signs and hearing people who want to learn sign language. An animated translucent hand silhouette guides your positioning while computer vision scores your pose in real-time.",
+        capabilities: [
+          "Translucent hand silhouette guide overlaid on live camera view.",
+          "Real-time Accuracy percentage meter (e.g. 94% Match, Hold for Streak).",
+          "Audio confirmation tones when a sign is executed correctly.",
+          "Progressive difficulty tiers: Beginner Essentials, Daily Phrases, A-Z Alphabet, and Emergency Signs.",
+          "Tracks daily streak, total signs mastered, and accuracy averages."
+        ],
+        steps: [
+          "Choose a practice card from the curriculum (e.g., 'Thank You' or 'Letter A').",
+          "Align your hand with the glowing guidance silhouette on the screen.",
+          "Watch the live Accuracy gauge rise as your finger angles align.",
+          "Hold the pose for 1.2 seconds to lock in the score and advance to the next challenge!"
+        ],
+        scenarios: "Special education classrooms, speech and occupational therapy, self-study at home for parents of deaf children, and sign language interpreter trainees.",
+        specs: [
+          { label: "Evaluation", val: "Real-time AI Match" },
+          { label: "Gamification", val: "Streaks & Points" },
+          { label: "Guides", val: "Silhouette Overlay" },
+          { label: "Curriculum", val: "Beginner to Advanced" }
+        ],
+        tabId: "shiksha"
+      },
+      sos: {
+        title: "1-Tap Emergency SOS Deck",
+        category: "Safety & Urgent Access",
+        icon: "🚨",
+        badgeColor: "bg-rose-50 text-rose-700 border-rose-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-rose-700">● High-Contrast Emergency Broadcast</span>
+            <span class="text-[11px] font-extrabold bg-rose-100 text-rose-800 px-2.5 py-0.5 rounded-full">Loud Audio Broadcast</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">Critical emergency communication cards for hospital ERs, police, pharmacies, and transit.</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-rose-100 shadow-xs">
+            <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">1-Tap Card</span>
+            <span>➔</span>
+            <span class="px-2 py-0.5 rounded bg-rose-600 text-white">Fullscreen Notice</span>
+            <span>➔</span>
+            <span class="px-2 py-0.5 rounded bg-rose-100 text-rose-800">Loud Siren Audio 📢</span>
+          </div>
+        `,
+        overview: "In an emergency, deaf individuals cannot afford to struggle with small buttons. The SOS Deck provides 6 bold, high-contrast situational tiles. Tapping any tile triggers a fullscreen high-contrast flashcard for bystanders to read, while automatically repeating a loud spoken voice announcement.",
+        capabilities: [
+          "6 Pre-loaded critical tiles: Identity Notice, Urgent Medical Help, Hospital Navigation, Police, Food/Water, Lost/Transit.",
+          "1-Tap Fullscreen Emergency Card: Bold, high-visibility text readable from 10 feet away.",
+          "Automatic Loud Speech Broadcast: Repeats clear emergency audio so bystanders hear immediately.",
+          "No typing required: Instant activation in high-stress situations.",
+          "Works 100% offline without requiring internet or cellular data."
+        ],
+        steps: [
+          "Open the <strong>Emergency SOS</strong> tab in ARTH.",
+          "Tap any relevant emergency card (e.g. 'Need Urgent Medical Help' or 'I am Lost').",
+          "Show the fullscreen high-visibility card to police, doctors, or bystanders.",
+          "Tap 'Repeat Audio Broadcast' if you need the voice announcement to play again."
+        ],
+        scenarios: "Crucial during traffic stops, medical emergencies, pharmacy visits, getting separated at busy train stations, or reporting unsafe situations to authorities.",
+        specs: [
+          { label: "Activation", val: "Single-Tap Instant" },
+          { label: "Display Mode", val: "Fullscreen High-Contrast" },
+          { label: "Voice Volume", val: "Amplified Audio" },
+          { label: "Offline Ready", val: "100% On-Device" }
+        ],
+        tabId: "sos"
+      },
+      dict: {
+        title: "Sign Dictionary & A-Z Fingerspelling",
+        category: "Vocabulary & Reference",
+        icon: "📖",
+        badgeColor: "bg-purple-50 text-purple-700 border-purple-200",
+        visualHighlight: `
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold text-purple-700">● 500+ Signs & Full A-Z Fingerspeller</span>
+            <span class="text-[11px] font-extrabold bg-purple-100 text-purple-800 px-2.5 py-0.5 rounded-full">Instant Search</span>
+          </div>
+          <p class="text-xs text-slate-700 font-semibold mb-2">A complete visual reference encyclopedia for American and Indian Sign Language.</p>
+          <div class="flex items-center gap-2 text-[11px] font-bold text-slate-600 bg-white/90 p-3 rounded-xl border border-purple-100 shadow-xs">
+            <span>Search Word ➔</span>
+            <span class="px-2.5 py-1 rounded bg-purple-100 text-purple-800">Visual Posture Guide</span>
+            <span>➔</span>
+            <span class="px-2.5 py-1 rounded bg-indigo-100 text-indigo-800">Practice in Camera 🎥</span>
+          </div>
+        `,
+        overview: "A fast, searchable reference library containing over 500 common sign language words, phrases, and all 26 alphabet handshapes. Each card includes detailed hand posture descriptions, movement tips, dialect indicators, and a one-click shortcut to practice in front of the camera.",
+        capabilities: [
+          "Comprehensive category filters: Greetings, Emergency, Daily Essentials, Questions, Emotions, and Alphabet A-Z.",
+          "Instant real-time search by keyword.",
+          "Detailed handshape, movement trajectory, and finger curvature instructions.",
+          "One-click 'Practice in Camera' button directly launches the camera evaluator for that sign.",
+          "Audio pronunciation button on every sign card to verify meaning."
+        ],
+        steps: [
+          "Click the <strong>Dictionary</strong> tab.",
+          "Type any word in the search box or select a category pill (e.g. Greetings, Essentials, Alphabet).",
+          "Read the hand posture guide and execution steps.",
+          "Click <strong>Practice in Camera</strong> to test yourself in real time!"
+        ],
+        scenarios: "Looking up unfamiliar signs, learning how to fingerspell names and street addresses, studying sign language vocabulary, and daily self-learning.",
+        specs: [
+          { label: "Database Size", val: "500+ Core Gestures" },
+          { label: "Alphabet Support", val: "Full A-Z Charts" },
+          { label: "Search Engine", val: "Instant Live Filter" },
+          { label: "Dialects", val: "ASL & ISL" }
+        ],
+        tabId: "dictionary"
+      }
+    };
+
+    let currentSelectedFeature = 'camera';
+
+    // Switch Showcase Card on the Right when a Left-Rail Feature is Tapped
+    function selectShowcaseFeature(featureKey) {
+      currentSelectedFeature = featureKey;
+      const data = FEATURE_DATA[featureKey];
+      if (!data) return;
+
+      // Update button active states on left rail
+      ['camera', 'voice', 'chat', 'practice', 'sos', 'dict'].forEach(key => {
+        const btn = document.getElementById(`featBtn-${key}`);
+        if (!btn) return;
+        if (key === featureKey) {
+          btn.className = "w-full p-4 rounded-2xl bg-white border-2 border-indigo-500 ring-2 ring-indigo-100 shadow-md transition-all text-left flex items-center justify-between group";
+          const arrow = btn.querySelector('span:last-child');
+          if (arrow) arrow.className = "text-indigo-600 font-black text-lg group-hover:translate-x-1 transition-transform";
+        } else {
+          btn.className = "w-full p-4 rounded-2xl bg-white border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all text-left flex items-center justify-between group";
+          const arrow = btn.querySelector('span:last-child');
+          if (arrow) arrow.className = "text-slate-300 group-hover:text-indigo-500 font-black text-lg group-hover:translate-x-1 transition-transform";
+        }
+      });
+
+      // Update Showcase Right Panel
+      document.getElementById('showcaseTitle').textContent = data.title;
+      document.getElementById('showcaseCategoryBadge').textContent = data.category;
+      document.getElementById('showcaseCategoryBadge').className = `text-xs font-bold px-3 py-1 rounded-full border ${data.badgeColor}`;
+      document.getElementById('showcaseIconBox').textContent = data.icon;
+      document.getElementById('showcaseVisualCard').innerHTML = data.visualHighlight;
+      document.getElementById('showcaseOverview').textContent = data.overview;
+
+      document.getElementById('showcaseCapabilities').innerHTML = data.capabilities.map(cap => `
+        <li class="flex items-start gap-2.5 text-slate-700 font-medium">
+          <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✓</span>
+          <span>${cap}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('showcaseSteps').innerHTML = data.steps.map((st, i) => `
+        <li class="flex items-start gap-3">
+          <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">${i + 1}</span>
+          <span>${st}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('showcaseSpecs').innerHTML = data.specs.map(sp => `
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-center">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${sp.label}</span>
+          <span class="font-extrabold text-slate-800 text-xs mt-1 block">${sp.val}</span>
+        </div>
+      `).join('');
+
+      const targetHref = `translator.html?tab=${data.tabId}`;
+      const btn = document.getElementById('showcaseLaunchBtn');
+      if (btn) {
+        btn.href = targetHref;
+        btn.setAttribute('data-href', targetHref);
+      }
+    }
+
+    // Full Drawer Controller (Left Side Slide-Over)
+    function openFeatureDrawer(featureKey) {
+      const data = FEATURE_DATA[featureKey];
+      if (!data) return;
+
+      document.getElementById('drawerTitle').textContent = data.title;
+      document.getElementById('drawerCategoryBadge').textContent = data.category;
+      document.getElementById('drawerCategoryBadge').className = `text-xs font-bold px-2.5 py-0.5 rounded-full border ${data.badgeColor}`;
+      document.getElementById('drawerIconBox').textContent = data.icon;
+      document.getElementById('drawerVisualCard').innerHTML = data.visualHighlight;
+      document.getElementById('drawerOverview').textContent = data.overview;
+
+      document.getElementById('drawerCapabilities').innerHTML = data.capabilities.map(cap => `
+        <li class="flex items-start gap-2.5 text-slate-700 font-medium">
+          <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">✓</span>
+          <span>${cap}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('drawerSteps').innerHTML = data.steps.map((st, i) => `
+        <li class="flex items-start gap-3">
+          <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 font-bold flex items-center justify-center flex-shrink-0 text-xs mt-0.5">${i + 1}</span>
+          <span>${st}</span>
+        </li>
+      `).join('');
+
+      document.getElementById('drawerScenarios').textContent = data.scenarios;
+
+      document.getElementById('drawerSpecs').innerHTML = data.specs.map(sp => `
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">${sp.label}</span>
+          <span class="font-extrabold text-slate-800 text-xs mt-1 block">${sp.val}</span>
+        </div>
+      `).join('');
+
+      const drawerBtn = document.getElementById('drawerLaunchBtn');
+      if (drawerBtn) {
+        const targetHref = `translator.html?tab=${data.tabId}`;
+        drawerBtn.href = targetHref;
+        drawerBtn.setAttribute('data-href', targetHref);
+      }
+
+      document.getElementById('featureDrawerBackdrop').classList.remove('hidden');
+      const drawer = document.getElementById('featureDetailDrawer');
+      drawer.classList.remove('-translate-x-full');
+      drawer.classList.add('translate-x-0');
+    }
+
+    function closeFeatureDrawer() {
+      const drawer = document.getElementById('featureDetailDrawer');
+      if (drawer) {
+        drawer.classList.remove('translate-x-0');
+        drawer.classList.add('-translate-x-full');
+      }
+      const backdrop = document.getElementById('featureDrawerBackdrop');
+      if (backdrop) {
+        setTimeout(() => backdrop.classList.add('hidden'), 250);
+      }
+    }
+
+    // Initialize Showcase with default feature on page load and handle auth guards
+    document.addEventListener('DOMContentLoaded', () => {
+      selectShowcaseFeature('camera');
+
+      // Check if redirected from translator app due to required sign in
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auth_required')) {
+          window.history.replaceState({}, '', window.location.pathname);
+          setTimeout(() => {
+            openAuthModal('signin', '🔒 Authentication Required: You must sign in or register before accessing the ARTH app.');
+          }, 150);
+        } else if (urlParams.get('signed_out')) {
+          window.history.replaceState({}, '', window.location.pathname);
+        }
+      } catch (e) {}
+    });
+  </script>
+
+</body>
+</html>
