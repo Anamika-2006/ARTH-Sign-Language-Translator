@@ -37,70 +37,125 @@
   <!-- Stylesheet (Strict Light Theme) -->
   <link rel="stylesheet" href="styles.css">
 </head>
-<body class="min-h-screen flex flex-col antialiased selection:bg-indigo-100 selection:text-indigo-900 bg-slate-50 text-slate-900">
+<body class="min-h-screen flex flex-col lg:flex-row antialiased selection:bg-indigo-100 selection:text-indigo-900 bg-slate-50 text-slate-900 overflow-x-hidden">
 
-  <!-- ================= TOP NAVIGATION BAR ================= -->
-  <header class="arth-navbar sticky top-0 z-40 px-4 lg:px-8 py-3.5 border-b border-slate-200/80 bg-white/90 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-      
-      <!-- Brand Logo & Clean Title -->
-      <a href="index.html" class="flex items-center gap-3 group transition hover:opacity-90">
-        <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition">
-          <svg width="24" height="24" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
-          </svg>
-        </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-xl font-extrabold tracking-tight text-slate-900">ARTH</span>
-            <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">AI Translator</span>
+  <!-- ================= DASHBOARD LEFT SIDEBAR ================= -->
+  <aside id="sidebarNav" class="dashboard-sidebar w-full lg:w-72 shrink-0 flex flex-col justify-between border-b lg:border-b-0 lg:border-r border-slate-200/90 lg:h-screen lg:sticky lg:top-0 p-4 lg:p-5 z-40 shadow-sm overflow-y-auto">
+    <div class="flex flex-col gap-5">
+      <!-- Brand Logo & Header -->
+      <div class="flex items-center justify-between pb-4 border-b border-slate-200/70">
+        <a href="index.html" class="flex items-center gap-3 group">
+          <div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center shadow-sm flex-shrink-0 group-hover:scale-105 transition">
+            <svg width="24" height="24" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M7 11.5V14m0-2.5v-6a1.5 1.5 0 113 0m-3 6a1.5 1.5 0 00-3 0v2a7.5 7.5 0 0015 0v-5a1.5 1.5 0 00-3 0m-6-3V11m0-5.5v-1a1.5 1.5 0 013 0v1m0 0V11m0-5.5a1.5 1.5 0 013 0v3m0 0V11"></path>
+            </svg>
           </div>
-          <p class="text-xs text-slate-500 font-medium hidden sm:block">Two-Way Sign Language & Voice Translation</p>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl font-extrabold tracking-tight text-slate-900">ARTH</span>
+              <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">AI</span>
+            </div>
+            <p class="text-[11px] text-slate-500 font-medium">Sign Language Platform</p>
+          </div>
+        </a>
+        <a href="index.html" class="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition" title="Back to Home">
+          <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+        </a>
+      </div>
+
+      <!-- Left Navigation Items -->
+      <div>
+        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 px-2 mb-2.5">
+          Dashboard Modes
         </div>
-      </a>
+        <nav class="flex flex-col gap-1.5">
+          <button data-tab-target="camera-translate" class="sidebar-nav-item nav-pill-active w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs">Sign ➔ Voice</div>
+              <div class="text-[11px] opacity-80 truncate">Camera gesture to speech</div>
+            </div>
+          </button>
 
-      <!-- Main Navigation Tabs (Desktop) -->
-      <nav class="hidden lg:flex items-center p-1 bg-slate-100 rounded-xl border border-slate-200 text-xs font-bold">
-        <button data-tab-target="camera-translate" class="nav-pill-active px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
-          <span>Sign ➔ Voice</span>
-        </button>
-        <button data-tab-target="reverse-translate" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
-          <span>Voice ➔ Sign</span>
-        </button>
-        <button data-tab-target="duo-chat" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-          <span>Live Conversation</span>
-        </button>
-        <button data-tab-target="shiksha" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-          <span>Practice</span>
-        </button>
-        <button data-tab-target="sos" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2 text-rose-600">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-          <span>Emergency SOS</span>
-        </button>
-        <button data-tab-target="dictionary" class="nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2">
-          <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-          <span>Dictionary</span>
-        </button>
-      </nav>
+          <button data-tab-target="reverse-translate" class="sidebar-nav-item nav-pill-inactive w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 100-6 3 3 0 000 6z"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs">Voice ➔ Sign</div>
+              <div class="text-[11px] opacity-80 truncate">Voice or text to hand pose</div>
+            </div>
+          </button>
 
-      <!-- Right Controls: Theme Switcher, Dialect, Auth & Settings -->
-      <div class="flex items-center gap-2">
-        <!-- Theme Colorway Accent Switcher -->
-        <div class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-100/90 border border-slate-200 shadow-xs" title="Select UI Accent Palette">
-          <span class="text-[10px] font-black uppercase tracking-wider text-slate-500 hidden sm:inline">Theme</span>
+          <button data-tab-target="duo-chat" class="sidebar-nav-item nav-pill-inactive w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs">Live Dialogue</div>
+              <div class="text-[11px] opacity-80 truncate">Dual side-by-side bridge</div>
+            </div>
+          </button>
+
+          <button data-tab-target="shiksha" class="sidebar-nav-item nav-pill-inactive w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs">Practice Shiksha</div>
+              <div class="text-[11px] opacity-80 truncate">Interactive sign trainer</div>
+            </div>
+          </button>
+
+          <button data-tab-target="sos" class="sidebar-nav-item nav-pill-inactive w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs text-rose-600">Emergency SOS</div>
+              <div class="text-[11px] opacity-80 truncate">Urgent medical alerts</div>
+            </div>
+          </button>
+
+          <button data-tab-target="dictionary" class="sidebar-nav-item nav-pill-inactive w-full text-left p-3 rounded-xl flex items-center gap-3">
+            <div class="nav-icon-bg w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center shrink-0">
+              <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-bold text-xs">Sign Dictionary</div>
+              <div class="text-[11px] opacity-80 truncate">Searchable gesture library</div>
+            </div>
+          </button>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Sidebar Bottom Controls -->
+    <div class="mt-6 pt-4 border-t border-slate-200/80 flex flex-col gap-3">
+      <!-- Dialect Toggle Button -->
+      <button id="dialectSelector" class="w-full px-3 py-2 rounded-xl border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center justify-between" title="Switch between ASL and ISL">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+          <span>Vocabulary: <strong>ASL Mode</strong></span>
+        </span>
+        <span class="text-[10px] uppercase font-extrabold px-1.5 py-0.5 rounded bg-indigo-200/70 text-indigo-800">Switch</span>
+      </button>
+
+      <!-- Theme Colorways -->
+      <div class="p-2.5 rounded-xl bg-slate-100/90 border border-slate-200 flex items-center justify-between">
+        <span class="text-[11px] font-bold text-slate-600">Theme Palette</span>
+        <div class="flex items-center gap-1.5">
           <button data-set-theme="iris" class="theme-dot bg-indigo-600 active" title="Electric Iris (Default)"></button>
           <button data-set-theme="ocean" class="theme-dot bg-sky-500" title="Cyber Ocean"></button>
           <button data-set-theme="emerald" class="theme-dot bg-emerald-500" title="Emerald Mint"></button>
           <button data-set-theme="sunset" class="theme-dot bg-rose-500" title="Sunset Aurora"></button>
         </div>
+      </div>
 
-        <button id="dialectSelector" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition flex items-center gap-1.5" title="Switch between ASL and ISL">
-          <span>ASL Mode</span>
-        </button>
+      <!-- Auth Profile & Settings -->
+      <div class="flex items-center justify-between pt-1">
         <div class="arth-auth-container flex items-center gap-2">
           <button onclick="document.getElementById('translatorAuthModal').classList.remove('hidden')" class="px-3 py-1.5 rounded-lg border border-indigo-200 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-xs font-bold transition">
             Sign In
@@ -110,23 +165,36 @@
           <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
       </div>
-
     </div>
+  </aside>
 
-    <!-- Mobile Nav Bar -->
-    <div class="lg:hidden mt-2.5 pt-2 border-t border-slate-200 flex items-center gap-1 overflow-x-auto text-xs font-semibold">
-      <button data-tab-target="camera-translate" class="nav-pill-active px-3 py-1.5 rounded-lg whitespace-nowrap">Sign ➔ Voice</button>
-      <button data-tab-target="reverse-translate" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Voice ➔ Sign</button>
-      <button data-tab-target="duo-chat" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Conversation</button>
-      <button data-tab-target="shiksha" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Practice</button>
-      <button data-tab-target="sos" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap text-rose-600">SOS</button>
-      <button data-tab-target="dictionary" class="nav-pill-inactive px-3 py-1.5 rounded-lg whitespace-nowrap">Dictionary</button>
-    </div>
-  </header>
+  <!-- ================= RIGHT WORKSPACE AREA ================= -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto">
+    <!-- Top Workspace Bar -->
+    <header class="sticky top-0 z-30 px-4 lg:px-8 py-3.5 bg-white/95 backdrop-blur-md border-b border-slate-200/80 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <!-- Mobile Sidebar Toggle -->
+        <button onclick="document.getElementById('sidebarNav').classList.toggle('hidden')" class="lg:hidden p-2 rounded-lg border border-slate-200 text-slate-700 hover:bg-slate-50 transition" title="Toggle Navigation">
+          <svg width="20" height="20" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+        <div>
+          <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Dashboard Workspace</div>
+          <h1 id="activeWorkspaceTabTitle" class="text-base lg:text-lg font-extrabold text-slate-900 tracking-tight">Real-Time Sign ➔ Voice Translator</h1>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="hidden sm:flex items-center gap-2 text-xs font-semibold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+          <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          <span>System Online • FastAPI v1.0.0</span>
+        </div>
+        <a href="index.html" class="px-3.5 py-1.5 rounded-lg border border-slate-200 hover:border-slate-300 text-slate-700 bg-white hover:bg-slate-50 text-xs font-bold transition">
+          Exit to Home
+        </a>
+      </div>
+    </header>
 
-
-  <!-- ================= MAIN CONTENT ================= -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 lg:p-6">
+    <!-- Main Content Workspace Container -->
+    <main class="flex-1 p-4 lg:p-6 max-w-7xl w-full mx-auto">
 
     <!-- ------------------------------------------------------------- -->
     <!-- 1. SIGN TO VOICE TRANSLATOR (CAMERA ➔ SPEECH & TEXT)          -->
@@ -140,10 +208,15 @@
           <!-- Status Bar -->
           <div class="flex items-center justify-between mb-3 px-1">
             <div class="flex items-center gap-2" id="camStatusBadge">
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-emerald"></span>
-              <span class="text-emerald-700 font-bold text-xs uppercase tracking-wide">AI Hand Tracking Active</span>
+              <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+              <span class="text-slate-600 font-bold text-xs uppercase tracking-wide">Camera Ready • Click Start</span>
             </div>
             <div class="flex items-center gap-2 text-xs">
+              <!-- Primary Start Real Camera Button in Card Header -->
+              <button id="btnHeaderToggleCamera" class="px-3 py-1.5 rounded-lg btn-gradient-primary text-white font-bold text-xs flex items-center gap-1.5 shadow-sm transition">
+                <svg width="15" height="15" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span>Start Real Camera</span>
+              </button>
               <button id="btnToggleMesh" class="px-2.5 py-1 rounded-lg border border-slate-200 text-indigo-700 font-semibold bg-indigo-50/70 hover:bg-indigo-50 transition">
                 Mesh Overlay: ON
               </button>
@@ -176,8 +249,23 @@
               </div>
             </div>
 
+            <!-- Prominent Offline Overlay with Start Button -->
+            <div id="cameraStartOverlay" class="absolute inset-0 bg-slate-950/75 backdrop-blur-xs flex flex-col items-center justify-center gap-3.5 z-20 text-center p-6">
+              <div class="w-16 h-16 rounded-2xl bg-indigo-600/30 border border-indigo-400/40 flex items-center justify-center text-indigo-300 shadow-inner">
+                <svg width="32" height="32" class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+              </div>
+              <div>
+                <h4 class="text-white font-extrabold text-base tracking-tight">Camera Is Currently Paused</h4>
+                <p class="text-slate-300 text-xs max-w-xs mt-1">Allow camera access in your browser to start real-time MediaPipe AI hand tracking.</p>
+              </div>
+              <button id="btnOverlayStartCamera" class="mt-1 px-5 py-2.5 rounded-xl btn-gradient-primary text-white font-bold text-sm shadow-lg hover:scale-105 active:scale-95 transition flex items-center gap-2">
+                <svg width="18" height="18" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+                <span>🎥 Open Webcam Now</span>
+              </button>
+            </div>
+
             <!-- Bottom Floating Control Bar -->
-            <div class="absolute bottom-3 inset-x-3 flex items-center justify-between p-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm">
+            <div class="absolute bottom-3 inset-x-3 flex items-center justify-between p-2 rounded-xl bg-white/95 backdrop-blur-md border border-slate-200 shadow-sm z-30">
               <button id="btnToggleCamera" class="px-3.5 py-1.5 rounded-lg btn-gradient-primary text-white font-bold text-xs flex items-center gap-1.5 transition">
                 <svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                 <span>Start Camera</span>
@@ -649,6 +737,8 @@
     </div>
   </footer>
 
+  </div> <!-- End Right Workspace Area -->
+
 
   <!-- ================= MODALS ================= -->
 
@@ -826,7 +916,6 @@
   </script>
 
   <!-- Scripts -->
-  <script src="api_client.js"></script>
   <script src="signs_data.js"></script>
   <script src="app.js"></script>
 </body>

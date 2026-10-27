@@ -213,6 +213,35 @@ class ArthUI {
     });
   }
 
+  // MediaPipe AI Hand Tracker Engine
+  static initMediaPipe() {
+    try {
+      if (typeof Hands !== 'undefined') {
+        const hands = new Hands({
+          locateFile: (file) => {
+            return `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`;
+          }
+        });
+        hands.setOptions({
+          maxNumHands: 1,
+          modelComplexity: 1,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        hands.onResults((results) => {
+          this.onMediaPipeHandResults(results);
+        });
+        ArthState.mediaPipeHands = hands;
+        ArthState.mediaPipeReady = true;
+        console.log('[ARTH] MediaPipe Hands initialized successfully.');
+      } else {
+        console.warn('[ARTH] MediaPipe Hands library not loaded; fallback simulated tracker available.');
+      }
+    } catch (err) {
+      console.warn('[ARTH] MediaPipe initialization notice:', err);
+    }
+  }
+
   // Navigation Switching
   static bindNavigation() {
     const tabs = document.querySelectorAll('[data-tab-target]');
@@ -244,11 +273,22 @@ class ArthUI {
     ArthState.activeTab = tabId;
     SoundEffects.click();
 
+    const tabTitles = {
+      'camera-translate': 'Real-Time Sign ➔ Voice Translator',
+      'reverse-translate': 'Voice / Speech ➔ Sign Language Avatar',
+      'duo-chat': 'Two-Way Live Dialogue Bridge',
+      'shiksha': 'ARTH Shiksha Practice Arena',
+      'sos': 'Emergency SOS Distress Deck',
+      'dictionary': 'Visual Sign Language & A-Z Dictionary'
+    };
+
     document.querySelectorAll('[data-tab-target]').forEach(el => {
       if (el.getAttribute('data-tab-target') === tabId) {
-        el.className = 'nav-pill-active px-4 py-2 rounded-lg transition flex items-center gap-2';
+        el.classList.add('nav-pill-active');
+        el.classList.remove('nav-pill-inactive');
       } else {
-        el.className = 'nav-pill-inactive px-4 py-2 rounded-lg transition flex items-center gap-2';
+        el.classList.remove('nav-pill-active');
+        el.classList.add('nav-pill-inactive');
       }
     });
 
@@ -261,6 +301,11 @@ class ArthUI {
       activeView.classList.remove('hidden');
     }
 
+    const titleEl = document.getElementById('activeWorkspaceTabTitle');
+    if (titleEl && tabTitles[tabId]) {
+      titleEl.textContent = tabTitles[tabId];
+    }
+
     if (tabId === 'reverse-translate') {
       this.drawReverseHandSign();
     }
@@ -269,12 +314,17 @@ class ArthUI {
   // Camera Management
   static initCameraVisualizer() {
     const toggleCamBtn = document.getElementById('btnToggleCamera');
+    const headerToggleBtn = document.getElementById('btnHeaderToggleCamera');
+    const overlayToggleBtn = document.getElementById('btnOverlayStartCamera');
     const mirrorBtn = document.getElementById('btnMirrorCamera');
     const meshBtn = document.getElementById('btnToggleMesh');
 
-    if (toggleCamBtn) {
-      toggleCamBtn.addEventListener('click', () => this.toggleCameraStream());
-    }
+    const handleToggle = () => this.toggleCameraStream();
+
+    if (toggleCamBtn) toggleCamBtn.addEventListener('click', handleToggle);
+    if (headerToggleBtn) headerToggleBtn.addEventListener('click', handleToggle);
+    if (overlayToggleBtn) overlayToggleBtn.addEventListener('click', handleToggle);
+
     if (mirrorBtn) {
       mirrorBtn.addEventListener('click', () => {
         ArthState.isCameraMirrored = !ArthState.isCameraMirrored;
@@ -300,73 +350,104 @@ class ArthUI {
     });
   }
 
-  // Initialize MediaPipe On-Device Hand Landmark AI
-  static initMediaPipe() {
-    if (typeof Hands !== 'undefined') {
-      try {
-        ArthState.mediaPipeHands = new Hands({
-          locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}`
-        });
-        ArthState.mediaPipeHands.setOptions({
-          maxNumHands: 2,
-          modelComplexity: 1,
-          minDetectionConfidence: 0.55,
-          minTrackingConfidence: 0.5
-        });
-        ArthState.mediaPipeHands.onResults((results) => {
-          ArthUI.onMediaPipeHandResults(results);
-        });
-        ArthState.mediaPipeReady = true;
-        console.log("[ARTH AI] Real-time MediaPipe Hand Vision Engine Active.");
-      } catch (err) {
-        console.warn("[ARTH AI] MediaPipe initialization error:", err);
-      }
-    }
-  }
-
   static async toggleCameraStream() {
     const video = document.getElementById('cameraVideo');
     const badge = document.getElementById('camStatusBadge');
     const btn = document.getElementById('btnToggleCamera');
+    const btnHeader = document.getElementById('btnHeaderToggleCamera');
+    const overlay = document.getElementById('cameraStartOverlay');
 
     if (!ArthState.isCameraActive) {
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Camera Access Error:\nYour browser does not support or allow camera access on this connection.\nPlease access via http://localhost:3000 or HTTPS.");
+        this.showToast("⚠️ Camera API unavailable on this connection.");
+        return;
+      }
+
+      let stream = null;
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: 'user' },
+        // Attempt 1: Optimal HD constraints
+        stream = await navigator.mediaDevices.getUserMedia({
+          video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false
         });
-        ArthState.stream = stream;
-        video.srcObject = stream;
-        await video.play();
-        ArthState.isCameraActive = true;
-        badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-emerald"></span><span class="text-emerald-700 font-bold text-xs uppercase tracking-wide">Webcam Live • Real-Time AI</span>`;
-        btn.innerHTML = `<span>Stop Camera</span>`;
-        btn.classList.add('bg-rose-600', 'hover:bg-rose-700');
-        btn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
-        this.showToast("Webcam connected! Real-time AI hand tracking active.");
-
-        // Launch real-time frame processing
-        this.startMediaPipePump();
-      } catch (err) {
-        console.warn("Camera access unavailable; using simulation mode:", err);
-        this.showToast("Webcam unavailable. Interactive Simulation active.");
-        ArthState.isCameraActive = true;
-        badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span><span class="text-amber-700 font-bold text-xs uppercase">Simulated Vision Demo</span>`;
-        btn.innerHTML = `<span>Simulation Mode</span>`;
+      } catch (err1) {
+        console.warn("[ARTH] Primary camera constraints failed, attempting fallback:", err1);
+        try {
+          // Attempt 2: Minimal fallback (works on any webcam hardware)
+          stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        } catch (err2) {
+          console.error("[ARTH] Camera failed completely:", err2);
+          if (err2.name === 'NotAllowedError' || err2.name === 'PermissionDeniedError') {
+            this.showToast("⚠️ Camera permission blocked. Allow camera access in browser URL bar.");
+            alert("Camera Permission Blocked:\n\nPlease click the lock or camera icon in your browser URL bar (next to localhost:3000) and choose 'Allow' for Camera, then click 'Open Webcam' again.");
+          } else if (err2.name === 'NotFoundError' || err2.name === 'DevicesNotFoundError') {
+            this.showToast("⚠️ No camera hardware found on this system.");
+            alert("No Camera Found:\nPlease ensure a webcam is connected to your computer.");
+          } else {
+            this.showToast(`⚠️ Camera error: ${err2.message || 'Unable to start camera'}`);
+          }
+          return;
+        }
       }
+
+      // Stream successfully acquired
+      ArthState.stream = stream;
+      if (video) {
+        video.srcObject = stream;
+        video.setAttribute('autoplay', '');
+        video.setAttribute('muted', '');
+        video.setAttribute('playsinline', '');
+        video.muted = true;
+        try {
+          await video.play();
+        } catch (playErr) {
+          console.warn("[ARTH] video.play notice:", playErr);
+        }
+      }
+
+      ArthState.isCameraActive = true;
+      if (overlay) overlay.classList.add('hidden');
+
+      if (badge) {
+        badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-emerald-500 pulse-emerald"></span><span class="text-emerald-700 font-bold text-xs uppercase tracking-wide">Webcam Live • Real-Time AI</span>`;
+      }
+
+      [btn, btnHeader].forEach(b => {
+        if (!b) return;
+        b.classList.remove('btn-gradient-primary');
+        b.classList.add('btn-gradient-rose');
+        b.innerHTML = `<svg width="16" height="16" class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M6 6h12v12H6z"/></svg> <span>Stop Camera</span>`;
+      });
+
+      this.showToast("Webcam connected! Real-time AI hand tracking active.");
+      this.startMediaPipePump();
+
     } else {
+      // Turn off camera
       if (ArthState.stream) {
         ArthState.stream.getTracks().forEach(track => track.stop());
         ArthState.stream = null;
       }
-      video.srcObject = null;
+      if (video) video.srcObject = null;
       ArthState.isCameraActive = false;
       ArthState.isRealHandDetected = false;
       ArthState.realLandmarks = null;
-      badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span class="text-slate-600 font-bold text-xs uppercase">Standby</span>`;
-      btn.innerHTML = `<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> <span>Start Camera</span>`;
-      btn.classList.remove('bg-rose-600', 'hover:bg-rose-700');
-      btn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+
+      if (overlay) overlay.classList.remove('hidden');
+
+      if (badge) {
+        badge.innerHTML = `<span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span><span class="text-slate-600 font-bold text-xs uppercase">Camera Off (Click to Start)</span>`;
+      }
+
+      [btn, btnHeader].forEach(b => {
+        if (!b) return;
+        b.classList.remove('btn-gradient-rose');
+        b.classList.add('btn-gradient-primary');
+        b.innerHTML = `<svg width="16" height="16" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg> <span>Start Real Camera</span>`;
+      });
+
+      this.showToast("Camera stopped.");
     }
   }
 
